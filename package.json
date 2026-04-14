@@ -5,6 +5,9 @@
   "bin": {
     "kb-wiki": "./bin/cli.js"
   },
+  "scripts": {
+    "postinstall": "cd scripts/qmd && npm install && npm run build"
+  },
   "files": [
     "bin/",
     "skills/",
