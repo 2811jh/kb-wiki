@@ -8,6 +8,7 @@
   "files": [
     "bin/",
     "skills/",
+    "scripts/",
     "templates/",
     "README.md"
   ],
@@ -30,8 +31,5 @@
   "homepage": "https://github.com/2811jh/kb-wiki",
   "engines": {
     "node": ">=22"
-  },
-  "dependencies": {
-    "@tobilu/qmd": "^2.1.0"
   }
 }

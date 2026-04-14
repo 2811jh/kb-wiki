@@ -131,7 +131,7 @@ your-wiki/
 |------|------|------|
 | **Obsidian** | 实时浏览 wiki，图谱视图可视化页面关联结构 | [obsidian.md](https://obsidian.md) |
 | **Obsidian Web Clipper** | 浏览器文章一键转 Markdown | Chrome/Firefox 扩展 |
-| **qmd** | 本地 Markdown 搜索引擎（BM25 + 向量），已内嵌在 skill 中 | 随 skill 自动安装 |
+| **qmd** | 本地 Markdown 搜索引擎（BM25 + 向量），完整源码内嵌在 `scripts/qmd/` | `/setup` 时自动编译 |
 | **Marp** | 将 wiki 页面转为幻灯片 | Obsidian 插件 |
 | **Dataview** | Obsidian 中查询 wiki 数据 | Obsidian 插件 |
 | **git** | 知识库版本控制 | `git init` 在知识库根目录 |

@@ -24,34 +24,57 @@ node --version
 
 ---
 
-### 步骤 2：验证 qmd 可用性
+### 步骤 2：安装并构建内嵌的 qmd 工具
 
-qmd 已作为 npm 依赖内嵌在 kb-wiki skill 中，用户无需单独安装。验证 qmd 是否可用：
-
-```bash
-npx qmd --version
-```
-
-**如果 qmd 可用**：
-```
-✅ qmd 已就绪！版本：<版本号>
-   qmd 是 kb-wiki 内嵌的本地搜索引擎（BM25 + 向量混合搜索），完全本地运行，数据不离开本机。
-```
-
-**如果 qmd 不可用**（极少情况，可能是 npm 安装不完整），尝试修复：
+qmd 搜索引擎的完整源码已内嵌在 skill 的 `scripts/qmd/` 目录中。首次使用需要安装依赖并编译：
 
 ```bash
-# 尝试全局安装作为后备方案
-npm install -g @tobilu/qmd
-qmd --version
+# 定位 skill 安装目录中的 qmd
+# QMD_DIR 是 kb-wiki skill 安装路径下的 scripts/qmd
+cd <skill安装路径>/scripts/qmd
+
+# 安装依赖
+npm install
+
+# 编译 TypeScript 源码
+npm run build
+
+# 验证安装成功
+node dist/cli/qmd.js --version
 ```
 
-**如果仍然失败**，告知用户：
+**安装成功**：
 ```
-⚠️ qmd 暂时不可用，但不影响知识库的基本功能（ingest/lint 仍可正常使用）。
-   /query 命令将无法使用混合搜索功能，只能依赖 LLM 上下文中的内容进行查询。
-   后续可运行 `npm install -g @tobilu/qmd` 手动安装。
+✅ qmd 已就绪！
+   qmd 是 kb-wiki 内嵌的本地搜索引擎（BM25 + 向量混合搜索），
+   完全本地运行（all on-device），数据不离开本机。
 ```
+
+**如果 npm install 失败**（可能是 native 模块编译问题），告知用户：
+```
+⚠️ qmd 依赖安装失败。常见原因：
+   - 缺少 C++ 编译工具（Windows 需要 Visual Studio Build Tools，macOS 需要 Xcode Command Line Tools）
+   - Node.js 版本不满足要求（需要 >= 22）
+   请解决以上问题后重新运行 /setup。
+   
+   qmd 暂时不可用不影响知识库的基本功能（ingest/lint 仍可正常使用），
+   但 /query 命令将无法使用混合搜索功能。
+```
+
+**LLM 调用 qmd 的方式**：
+
+安装完成后，LLM 通过以下方式调用 qmd（所有后续命令都用这个路径）：
+
+```bash
+node <skill安装路径>/scripts/qmd/dist/cli/qmd.js <命令> [参数]
+
+# 例如：
+node <skill安装路径>/scripts/qmd/dist/cli/qmd.js query "用户痛点"
+node <skill安装路径>/scripts/qmd/dist/cli/qmd.js status
+node <skill安装路径>/scripts/qmd/dist/cli/qmd.js update
+```
+
+> 💡 提示：也可以在 scripts/qmd 目录执行 `npm link`，之后就能直接用 `qmd` 命令全局调用。
 
 ---
 

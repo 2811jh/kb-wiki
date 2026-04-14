@@ -1,0 +1,6 @@
+# kb-wiki .gitignore
+node_modules/
+scripts/qmd/node_modules/
+scripts/qmd/dist/
+*.sqlite
+.DS_Store
