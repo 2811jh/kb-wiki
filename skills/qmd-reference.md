@@ -8,16 +8,32 @@
 
 ## 安装
 
+qmd 已完整内嵌在 kb-wiki 的 `scripts/qmd/` 目录中，安装 skill 时通过 `postinstall` 自动编译。
+
 ```bash
-# 安装（需要 Node.js >= 22）
-npm install -g @tobilu/qmd
+# 验证 qmd 是否可用
+node <skill安装路径>/scripts/qmd/dist/cli/qmd.js --version
 
-# 验证安装
-qmd --version
-
-# 更新到最新版本
-npm update -g @tobilu/qmd
+# 如果 postinstall 失败，手动编译：
+cd <skill安装路径>/scripts/qmd
+pnpm install --no-frozen-lockfile
+npx tsc -p tsconfig.build.json
 ```
+
+## 搜索功能分级与模型依赖
+
+qmd 的搜索能力按层级递进，高层级功能需要下载本地 AI 模型（首次使用时自动下载到 `~/.cache/qmd/models/`）：
+
+| 层级 | 功能 | 命令 | 所需模型 | 模型大小 |
+|------|------|------|---------|---------|
+| **层级 1** | BM25 关键词搜索 | `qmd search` | 无需模型 ✅ | 0 |
+| **层级 2** | 向量语义搜索 | `qmd vsearch` | embeddinggemma-300M + qmd-query-expansion-1.7B | ~1.3GB |
+| **层级 3** | 完整混合搜索 + 重排序 | `qmd query` | 上述 + Qwen3-Reranker-0.6B | ~2GB |
+
+**预下载所有模型**：`qmd pull`
+**中国大陆用户**：需设置 `HF_ENDPOINT=https://hf-mirror.com` 环境变量
+
+> 注意：向量搜索还需要先运行 `qmd embed` 建立向量索引（一次性操作，会自动下载 Embedding 模型）。
 
 ---
 

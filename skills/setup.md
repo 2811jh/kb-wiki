@@ -26,7 +26,7 @@ node --version
 
 ### 步骤 2：验证 qmd 已就绪
 
-qmd 在 `npx skills add` 安装 skill 时已通过 `postinstall` 钩子自动完成依赖安装和编译。此步骤仅做验证：
+qmd 在 `npx skills add` 安装 skill 时已通过 `postinstall` 钩子自动完成依赖安装和编译（跨平台 Node.js 脚本，Windows/macOS/Linux 均支持）。此步骤仅做验证：
 
 ```bash
 node <skill安装路径>/scripts/qmd/dist/cli/qmd.js --version
@@ -37,19 +37,19 @@ node <skill安装路径>/scripts/qmd/dist/cli/qmd.js --version
 ✅ qmd 已就绪（版本：x.x.x），继续创建知识库。
 ```
 
-**如果 qmd 不可用**（可能是 postinstall 失败），尝试手动修复：
+**如果 qmd 不可用**（可能是 postinstall 失败），手动修复：
 
 ```bash
 cd <skill安装路径>/scripts/qmd
-npm install
-npm run build
+pnpm install --no-frozen-lockfile   # 如果没有 pnpm，先 npm install -g pnpm
+npx tsc -p tsconfig.build.json     # 编译 TypeScript
 ```
 
 如果仍然失败，告知用户：
 ```
 ⚠️ qmd 暂时不可用。常见原因：
-   - 缺少 C++ 编译工具（Windows 需要 Visual Studio Build Tools，macOS 需要 Xcode Command Line Tools）
-   - Node.js 版本不满足要求（需要 >= 22）
+   - 缺少 C++ 编译工具（Windows: Visual Studio Build Tools, macOS: xcode-select --install）
+   - Node.js 版本 < 22
    
    不影响知识库的基本功能（ingest/lint 仍可正常使用），
    但 /query 命令将无法使用混合搜索功能。
@@ -64,6 +64,43 @@ node <skill安装路径>/scripts/qmd/dist/cli/qmd.js <命令> [参数]
 node <skill安装路径>/scripts/qmd/dist/cli/qmd.js query "用户痛点"
 node <skill安装路径>/scripts/qmd/dist/cli/qmd.js update
 node <skill安装路径>/scripts/qmd/dist/cli/qmd.js collection list
+```
+
+### 步骤 2.5：配置 HuggingFace 镜像（中国大陆用户）
+
+qmd 的完整搜索功能需要下载 AI 模型（约 2GB），模型托管在 HuggingFace 上。中国大陆用户需要设置镜像：
+
+**询问用户**：
+```
+你是否在中国大陆使用？如果是，需要配置 HuggingFace 镜像以下载 AI 搜索模型。
+```
+
+**如果用户确认**，帮助设置环境变量：
+
+Windows PowerShell：
+```powershell
+[System.Environment]::SetEnvironmentVariable('HF_ENDPOINT', 'https://hf-mirror.com', 'User')
+```
+
+macOS/Linux（追加到 ~/.bashrc 或 ~/.zshrc）：
+```bash
+echo 'export HF_ENDPOINT=https://hf-mirror.com' >> ~/.zshrc
+source ~/.zshrc
+```
+
+**模型下载说明**（告知用户）：
+```
+qmd 的搜索功能分三个层级，模型在首次使用时自动下载到 ~/.cache/qmd/models/：
+
+层级 1 - BM25 关键词搜索：无需模型，安装后即可使用
+层级 2 - 向量语义搜索：需要 Embedding 模型（~300MB）
+层级 3 - 完整混合搜索：需要全部 3 个模型（~2GB）
+  - embeddinggemma-300M（向量嵌入，~300MB）
+  - qmd-query-expansion-1.7B（查询扩展 HyDE/Vec/Lex，~1GB）
+  - Qwen3-Reranker-0.6B（结果重排序，~600MB）
+
+模型会在首次使用对应功能时自动下载，无需手动操作。
+也可以用 `qmd pull` 命令预先下载所有模型。
 ```
 
 ---
