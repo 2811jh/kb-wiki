@@ -189,6 +189,28 @@ theme: default
 - [ ] 研究用户对安全性的实际担忧（数据空白）
 ```
 
+#### 形式 E：数据可视化（图表）
+
+如果分析涉及定量数据或趋势对比，可以生成 Python 图表代码（matplotlib/seaborn）：
+
+```python
+import matplotlib.pyplot as plt
+import matplotlib
+matplotlib.rcParams['font.sans-serif'] = ['SimHei']  # 中文支持
+
+labels = ['操作步骤', '加载速度', '信任感', '信息清晰度']
+scores = [3.2, 2.8, 4.1, 3.5]
+plt.bar(labels, scores, color=['#e74c3c' if s < 3.5 else '#2ecc71' for s in scores])
+plt.title('支付流程各维度用户满意度')
+plt.ylabel('满意度（1-5）')
+plt.savefig('wiki/synthesis/assets/payment-satisfaction.png', dpi=150)
+plt.show()
+```
+
+#### 形式 F：Obsidian Canvas（画布）
+
+对于需要可视化关系网络的分析，可以生成 `.canvas` 文件（Obsidian Canvas JSON 格式），在 Obsidian 中以画布方式展示概念之间的关系图。适合梳理用户旅程、竞品关系、因果链路等复杂关联。
+
 ---
 
 ### 步骤 7：询问用户是否将洞察归档
@@ -252,6 +274,8 @@ query: 我们的用户在支付流程中最大的痛点是什么？
 ```
 
 **注**：如果用户选择不归档，不记录到 log.md（避免日志膨胀）。
+
+> 💡 **探索的复利效应**：通过归档机制，用户的每一次探索性提问都会像导入新资料一样，在知识库中不断积累复利——对比分析、发现的关联、分析结论，这些有价值的洞察不会消失在聊天记录中，而是成为知识库永久的一部分。
 
 ---
 
