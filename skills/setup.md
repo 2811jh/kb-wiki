@@ -24,36 +24,33 @@ node --version
 
 ---
 
-### 步骤 2：检测并安装 qmd
+### 步骤 2：验证 qmd 可用性
+
+qmd 已作为 npm 依赖内嵌在 kb-wiki skill 中，用户无需单独安装。验证 qmd 是否可用：
 
 ```bash
+npx qmd --version
+```
+
+**如果 qmd 可用**：
+```
+✅ qmd 已就绪！版本：<版本号>
+   qmd 是 kb-wiki 内嵌的本地搜索引擎（BM25 + 向量混合搜索），完全本地运行，数据不离开本机。
+```
+
+**如果 qmd 不可用**（极少情况，可能是 npm 安装不完整），尝试修复：
+
+```bash
+# 尝试全局安装作为后备方案
+npm install -g @tobilu/qmd
 qmd --version
 ```
 
-**如果 qmd 未安装**，询问用户是否立即安装：
-
+**如果仍然失败**，告知用户：
 ```
-qmd 是 kb-wiki 的本地搜索引擎（BM25 + 向量搜索），强烈推荐安装。
-是否现在安装？（需要 Node.js >= 22）
-```
-
-用户确认后执行：
-
-```bash
-npm install -g @tobilu/qmd
-qmd --version  # 验证安装成功
-```
-
-安装成功提示：
-```
-✅ qmd 安装成功！版本：<版本号>
-```
-
-**如果用户选择跳过 qmd**，告知：
-```
-⚠️ 没有 qmd，/query 命令将无法使用混合搜索功能，
-   只能依赖 LLM 上下文中的内容进行查询。
-   后续可随时运行 `npm install -g @tobilu/qmd` 安装。
+⚠️ qmd 暂时不可用，但不影响知识库的基本功能（ingest/lint 仍可正常使用）。
+   /query 命令将无法使用混合搜索功能，只能依赖 LLM 上下文中的内容进行查询。
+   后续可运行 `npm install -g @tobilu/qmd` 手动安装。
 ```
 
 ---
