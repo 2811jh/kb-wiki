@@ -780,6 +780,62 @@ qmd update
 
 ---
 
+### 步骤 9.5：预下载 AI 搜索模型（向量语义搜索 + LLM 重排序）
+
+> ⚠️ 此步骤在**创建知识库时**就完成模型下载，而不是等到第一次 `/query` 时才触发。
+> 这样用户在 `/query` 时可以立即享受完整的混合搜索（BM25 + 向量 + LLM 重排序），无需等待下载。
+
+**告知用户**：
+
+```
+📥 正在预下载 AI 搜索模型（共约 2GB，只需下载一次）：
+   - embeddinggemma-300M    向量嵌入模型（~300MB）
+   - qmd-query-expansion    查询扩展模型（~1GB）
+   - Qwen3-Reranker-0.6B   结果重排序模型（~600MB）
+
+模型保存到：~/.cache/qmd/models/
+下载完成后，/query 将自动使用混合搜索（质量最高）。
+```
+
+**执行预下载**：
+
+```bash
+# 下载全部 AI 模型（包含 embedding、query-expansion、reranker）
+node <SKILL_PATH>/scripts/qmd/dist/cli/qmd.js pull
+
+# 等待下载完成后，对 wiki/ 目录生成初始向量索引（当前 wiki 为空，建立空索引）
+node <SKILL_PATH>/scripts/qmd/dist/cli/qmd.js embed --collection {{WIKI_NAME}}
+```
+
+> 💡 `qmd pull` 会下载 qmd 搜索功能所需的所有模型。下载过程中如遇网络中断，可重新运行 `qmd pull` 继续下载（支持断点续传）。
+
+**下载完成后输出**：
+
+```
+✅ AI 搜索模型下载完成！
+   向量语义搜索（~1.3GB 模型）：已就绪
+   LLM 重排序（Qwen3-Reranker-0.6B）：已就绪
+
+今后所有 /query 将自动使用：BM25 关键词 + 向量语义 + LLM 重排序（三重混合）
+```
+
+**如果下载失败或用户希望跳过**：
+
+```
+⚠️ 模型下载失败（可能原因：网络问题、磁盘空间不足）。
+知识库基本功能仍可正常使用：
+  - /ingest：✅ 正常（不需要 AI 模型）
+  - /lint：✅ 正常（不需要 AI 模型）
+  - /query（BM25 关键词搜索）：✅ 可用
+  - /query（向量语义搜索）：❌ 暂不可用
+
+解决网络/磁盘问题后，可随时运行：
+  node <SKILL_PATH>/scripts/qmd/dist/cli/qmd.js pull
+来完成模型下载。
+```
+
+---
+
 ### 步骤 10：输出欢迎信息
 
 ```

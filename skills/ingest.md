@@ -296,13 +296,24 @@ related: [entities/用户-A, entities/用户-B, concepts/加载速度, synthesis
 
 ---
 
-### 步骤 10：重建 qmd 索引 + 检查是否触发 Lint 提醒
+### 步骤 10：重建 qmd 索引 + 更新向量嵌入 + 检查是否触发 Lint 提醒
 
-**重建索引**：
+**重建 BM25 索引**：
 
 ```bash
-qmd update
+node <SKILL_PATH>/scripts/qmd/dist/cli/qmd.js update --collection {{WIKI_NAME}}
 ```
+
+**更新向量嵌入索引**（确保 `/query` 时语义搜索覆盖到本次新增的页面）：
+
+```bash
+# 对本次新增/修改的页面生成向量嵌入
+node <SKILL_PATH>/scripts/qmd/dist/cli/qmd.js embed --collection {{WIKI_NAME}}
+```
+
+> 💡 **说明**：`qmd embed` 只会处理自上次 embed 后新增/变更的页面（增量更新），不会重复处理已有页面，速度很快。
+> AI 模型已在 `/setup` 步骤 9.5 中预下载，此处直接使用，无需等待。
+> 如果 `/setup` 时跳过了模型下载，首次 `embed` 会触发自动下载（约 1.3GB），耗时较长。
 
 **统计 ingest 次数，判断是否触发 Lint 提醒**：
 
