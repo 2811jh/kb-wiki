@@ -797,41 +797,51 @@ qmd update
 下载完成后，/query 将自动使用混合搜索（质量最高）。
 ```
 
-**执行预下载**：
+**执行模型预下载**：
+
+qmd 的 AI 模型在**首次运行 `qmd embed` 时自动下载**（无需单独的 pull 命令）。
 
 ```bash
-# 下载全部 AI 模型（包含 embedding、query-expansion、reranker）
-node <SKILL_PATH>/scripts/qmd/dist/cli/qmd.js pull
-
-# 等待下载完成后，对 wiki/ 目录生成初始向量索引（当前 wiki 为空，建立空索引）
-node <SKILL_PATH>/scripts/qmd/dist/cli/qmd.js embed --collection {{WIKI_NAME}}
+# 触发模型下载 + 对初始 wiki 目录（index.md + log.md）生成向量嵌入
+# ⚠️ 首次运行会下载约 1.3GB 模型，时间较长，请耐心等待
+node <SKILL_PATH>/scripts/qmd/dist/cli/qmd.js embed
 ```
 
-> 💡 `qmd pull` 会下载 qmd 搜索功能所需的所有模型。下载过程中如遇网络中断，可重新运行 `qmd pull` 继续下载（支持断点续传）。
+> ⚠️ **注意**：`qmd embed` 运行时**没有进度条输出**，这是 qmd 当前版本的特性。
+> 模型下载可能需要 5-30 分钟（取决于网速），期间命令会静默等待，这是**正常现象**，请勿中断。
 
-**下载完成后输出**：
+验证模型是否下载并嵌入成功：
 
-```
-✅ AI 搜索模型下载完成！
-   向量语义搜索（~1.3GB 模型）：已就绪
-   LLM 重排序（Qwen3-Reranker-0.6B）：已就绪
-
-今后所有 /query 将自动使用：BM25 关键词 + 向量语义 + LLM 重排序（三重混合）
+```bash
+node <SKILL_PATH>/scripts/qmd/dist/cli/qmd.js status
 ```
 
-**如果下载失败或用户希望跳过**：
+在 `status` 输出中检查 `Vectors` 一行：
+- `Vectors: N embedded`（N > 0）→ ✅ 嵌入成功，向量搜索可用
+- `Vectors: 0 embedded` → ⚠️ 嵌入未完成，可能模型还在下载中，稍后重试
+
+**成功标志**（status 输出示例）：
 
 ```
-⚠️ 模型下载失败（可能原因：网络问题、磁盘空间不足）。
+Documents
+  Total:    2 files indexed
+  Vectors:  2 embedded    ← 这里应该 > 0
+  Pending:  0 need embedding
+```
+
+**如果 embed 失败或用户希望跳过**：
+
+```
+⚠️ 向量索引建立失败（可能原因：网络问题、磁盘空间不足、首次下载超时）。
 知识库基本功能仍可正常使用：
   - /ingest：✅ 正常（不需要 AI 模型）
   - /lint：✅ 正常（不需要 AI 模型）
-  - /query（BM25 关键词搜索）：✅ 可用
+  - /query（BM25 关键词搜索）：✅ 可用（使用 qmd search 命令）
   - /query（向量语义搜索）：❌ 暂不可用
 
-解决网络/磁盘问题后，可随时运行：
-  node <SKILL_PATH>/scripts/qmd/dist/cli/qmd.js pull
-来完成模型下载。
+解决网络/磁盘问题后，可随时重新运行：
+  node <SKILL_PATH>/scripts/qmd/dist/cli/qmd.js embed
+来完成向量索引。
 ```
 
 ---

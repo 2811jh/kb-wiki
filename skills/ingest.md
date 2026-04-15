@@ -301,14 +301,16 @@ related: [entities/用户-A, entities/用户-B, concepts/加载速度, synthesis
 **重建 BM25 索引**：
 
 ```bash
-node <SKILL_PATH>/scripts/qmd/dist/cli/qmd.js update --collection {{WIKI_NAME}}
+node <SKILL_PATH>/scripts/qmd/dist/cli/qmd.js update
 ```
+
+> 注意：`qmd update` 会更新所有已注册集合的索引，这是正常行为。
 
 **更新向量嵌入索引**（确保 `/query` 时语义搜索覆盖到本次新增的页面）：
 
 ```bash
-# 对本次新增/修改的页面生成向量嵌入
-node <SKILL_PATH>/scripts/qmd/dist/cli/qmd.js embed --collection {{WIKI_NAME}}
+# 对所有新增/修改的页面生成向量嵌入（增量，仅处理变更页面）
+node <SKILL_PATH>/scripts/qmd/dist/cli/qmd.js embed
 ```
 
 > 💡 **说明**：`qmd embed` 只会处理自上次 embed 后新增/变更的页面（增量更新），不会重复处理已有页面，速度很快。

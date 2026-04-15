@@ -23,26 +23,37 @@
 > ❌ **禁止**：凭借对 index.md、log.md 或之前对话的已知内容，直接选择文件读取。
 > ✅ **必须**：将用户查询交给 qmd，由搜索引擎客观排序后，再决定读哪些文件。
 
-**执行混合搜索**（AI 模型在 `/setup` 时已预下载，直接使用）：
+**首先确认向量索引状态**：
 
 ```bash
-node <SKILL_PATH>/scripts/qmd/dist/cli/qmd.js query "{{用户的查询关键词}}" --collection {{WIKI_NAME}} --top 10
+node <SKILL_PATH>/scripts/qmd/dist/cli/qmd.js status
 ```
 
-> 此命令使用 **BM25 + 向量语义 + LLM 重排序**三重混合搜索，模型已在 `/setup` 阶段完成下载和初始化。
+查看 `status` 输出中 `Vectors` 一行：
+- `Vectors: N embedded`（N > 0）→ 使用混合搜索 `qmd query`
+- `Vectors: 0 embedded` → 使用 BM25 搜索 `qmd search`（向量索引未就绪）
 
-**如果搜索报错（向量索引缺失）**，说明 `/setup` 时跳过了模型下载，回退到纯关键词搜索并提示用户：
+**有向量索引时——执行混合搜索**（BM25 + 向量语义 + LLM 重排序）：
 
 ```bash
-# 回退到 BM25 关键词搜索
-node <SKILL_PATH>/scripts/qmd/dist/cli/qmd.js search "{{关键词1}} {{关键词2}}" --collection {{WIKI_NAME}} --top 10
+node <SKILL_PATH>/scripts/qmd/dist/cli/qmd.js query "{{用户的查询关键词}}" -c {{WIKI_NAME}} -n 10
 ```
 
-告知用户：
+> ⚠️ **注意**：`qmd query` 在向量索引未就绪时会**静默返回空**（无任何输出或报错），这是 qmd 当前版本的特性。如果运行后无输出，请先检查 `qmd status` 确认向量索引状态。
+
+**无向量索引时——使用 BM25 关键词搜索**：
+
+```bash
+node <SKILL_PATH>/scripts/qmd/dist/cli/qmd.js search "{{关键词1}} {{关键词2}}" -c {{WIKI_NAME}} -n 10
 ```
-⚠️ 向量搜索不可用（模型未下载）。本次使用 BM25 关键词搜索。
+
+若 BM25 搜索也无结果，尝试调整关键词（中英文均试）或扩宽搜索词范围。
+
+**如果向量索引未就绪**，告知用户：
+```
+⚠️ 向量索引未就绪，本次使用 BM25 关键词搜索（仍可找到相关内容，但语义匹配能力较弱）。
 如需完整语义搜索，请运行：
-  node <SKILL_PATH>/scripts/qmd/dist/cli/qmd.js pull
+  node <SKILL_PATH>/scripts/qmd/dist/cli/qmd.js embed
 ```
 
 **搜索结果即为候选文件列表**，按相关性得分排序。取 top 5~10 进入下一步。
