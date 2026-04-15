@@ -8,11 +8,14 @@
 
 ## 安装
 
-qmd 已完整内嵌在 kb-wiki 的 `scripts/qmd/` 目录中，安装 skill 时通过 `postinstall` 自动编译。
+qmd 已完整内嵌在 kb-wiki 的 `scripts/qmd/` 目录中，安装 skill 时通过 `postinstall` 自动编译，并注册 `qmd` 全局命令。
 
 ```bash
 # 验证 qmd 是否可用
-node <skill安装路径>/scripts/qmd/dist/cli/qmd.js --version
+qmd --version
+
+# 如果全局命令不可用，用包装脚本调用：
+node <skill安装路径>/bin/qmd.js --version
 
 # 如果 postinstall 失败，手动编译：
 cd <skill安装路径>/scripts/qmd

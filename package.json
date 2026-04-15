@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "description": "基于 llm-wiki 理念的 LLM 驱动知识库 skill，面向 UX/产品研究团队",
   "bin": {
-    "kb-wiki": "./bin/cli.js"
+    "kb-wiki": "./bin/cli.js",
+    "qmd": "./bin/qmd.js"
   },
   "scripts": {
     "postinstall": "node bin/postinstall.js"

@@ -55,15 +55,19 @@ npx tsc -p tsconfig.build.json     # 编译 TypeScript
    但 /query 命令将无法使用混合搜索功能。
 ```
 
-**LLM 调用 qmd 的方式**（所有后续命令统一用这个路径）：
+**LLM 调用 qmd 的方式**：
+
+skill 已在 `package.json` 中注册了 `qmd` 命令（`bin/qmd.js` 包装脚本）。安装 skill 后，LLM 可直接调用：
 
 ```bash
-node <skill安装路径>/scripts/qmd/dist/cli/qmd.js <命令> [参数]
+# 方式 1（推荐）：直接用 qmd 命令（npm 全局链接）
+qmd query "用户痛点"
+qmd update
+qmd collection list
 
-# 例如：
-node <skill安装路径>/scripts/qmd/dist/cli/qmd.js query "用户痛点"
-node <skill安装路径>/scripts/qmd/dist/cli/qmd.js update
-node <skill安装路径>/scripts/qmd/dist/cli/qmd.js collection list
+# 方式 2：通过 node 调用包装脚本（如果全局命令不可用）
+node <skill安装路径>/bin/qmd.js query "用户痛点"
+node <skill安装路径>/bin/qmd.js update
 ```
 
 ### 步骤 2.5：配置 HuggingFace 镜像（中国大陆用户）
