@@ -14,104 +14,69 @@
 
 ---
 
+> ⚠️ **重要约束**：查询时，**必须先通过 qmd 搜索来发现相关文件，不得凭借对 index.md 的已知内容直接选择文件**。qmd 能发现关键词不明显但语义相关的页面（如 `social-play-motivation` 对"山头服用户为什么流失"语义相关但无直接关键词），而手工选择文件存在遗漏风险。
+
 ## 完整流程
 
-### 步骤 1：分析查询意图，选择搜索策略
+### 步骤 1：通过 qmd 搜索发现相关文件（必须执行，不可跳过）
 
-根据查询类型选择最合适的 qmd 搜索命令：
+> ❌ **禁止**：凭借对 index.md、log.md 或之前对话的已知内容，直接选择文件读取。
+> ✅ **必须**：将用户查询交给 qmd，由搜索引擎客观排序后，再决定读哪些文件。
 
-| 查询类型 | 推荐命令 | 适用场景 |
-|---------|---------|---------|
-| 精确关键词 | `qmd search <关键词>` | 搜索特定术语、人名、产品名 |
-| 语义搜索 | `qmd vsearch <描述>` | 搜索概念、问题、模糊描述 |
-| 综合最佳 | `qmd query <问题>` | 大多数查询的推荐选择 |
-
-**对于大多数研究问题，优先使用 `qmd query`**（混合搜索 + 重排序 + 上下文扩展）。
-
----
-
-### 步骤 2：读取 index.md 定位相关页面
-
-在执行搜索前，先读取 `wiki/index.md` 了解知识库全貌：
-
-```bash
-cat "{{WIKI_PATH}}/wiki/index.md"
-```
-
-根据 index.md 的分类，判断哪些页面可能与查询相关，缩小搜索范围。
-
----
-
-### 步骤 3：检查向量索引 & 执行 qmd 搜索
-
-**首先确认向量索引是否存在**（首次使用语义搜索前必须执行）：
+**检查向量索引是否存在**：
 
 ```bash
 node <SKILL_PATH>/scripts/qmd/dist/cli/qmd.js status --collection {{WIKI_NAME}}
 ```
 
-- 如果状态显示**无向量索引**，告知用户：
+**根据索引状态选择搜索命令**：
 
-  ```
-  ⚠️ 尚未建立向量索引，语义搜索（vsearch / query）功能不可用。
-  
-  现在建立向量索引需要下载 AI 模型（约 1.3~2GB），首次下载较慢。
-  是否现在建立？（建议在 ingest 几篇资料后再建立，效果更好）
-  
-  选项：
-  1. 现在建立（运行 qmd embed，需下载模型）
-  2. 暂时跳过（本次查询仅使用 BM25 关键词搜索）
-  ```
+| 向量索引状态 | 使用命令 | 说明 |
+|------------|---------|------|
+| ✅ 已建立 | `qmd query "..."` | 混合搜索（BM25 + 向量 + 重排序），质量最高 |
+| ❌ 未建立 | `qmd search "..."` | 纯 BM25 关键词搜索，仍优于手工选择 |
 
-  **用户选择"现在建立"**，执行：
-  ```bash
-  # 中国大陆用户先确认 HF_ENDPOINT 已设置
-  node <SKILL_PATH>/scripts/qmd/dist/cli/qmd.js embed --chunk-strategy auto --collection {{WIKI_NAME}}
-  ```
-  > 首次运行会自动下载 embeddinggemma-300M（~300MB）和 qmd-query-expansion-1.7B（~1GB）。下载完成后自动 embed，无需其他操作。
+**如果向量索引未建立**，先询问用户：
 
-  **用户选择"暂时跳过"**，改用 BM25 搜索：
-  ```bash
-  node <SKILL_PATH>/scripts/qmd/dist/cli/qmd.js search "{{查询关键词}}" --collection {{WIKI_NAME}}
-  ```
+```
+⚠️ 尚未建立向量索引，语义搜索功能不可用。
+本次查询将使用 BM25 关键词搜索（仍比手工选文件准确，但可能遗漏语义相关页面）。
 
-- 如果向量索引**已存在**，直接进行搜索。
-
-**基础查询（推荐，需向量索引）**：
-
-```bash
-node <SKILL_PATH>/scripts/qmd/dist/cli/qmd.js query "支付流程用户痛点" --collection {{WIKI_NAME}}
+是否现在建立向量索引？（需要下载 ~1.3GB AI 模型，首次较慢）
+1. 现在建立（推荐，效果更好）
+2. 暂时跳过，本次使用 BM25
 ```
 
-**精确关键词搜索**：
+**执行搜索**：
 
 ```bash
-qmd search "支付流程" --collection ux-research
+# 有向量索引时（推荐）
+node <SKILL_PATH>/scripts/qmd/dist/cli/qmd.js query "{{用户的查询关键词}}" --collection {{WIKI_NAME}} --top 10
+
+# 无向量索引时（回退）
+node <SKILL_PATH>/scripts/qmd/dist/cli/qmd.js search "{{关键词1}} {{关键词2}}" --collection {{WIKI_NAME}} --top 10
 ```
 
-**语义搜索**：
-
-```bash
-qmd vsearch "用户在付款时遇到的阻碍和挫折" --collection ux-research
-```
-
-**跨集合搜索**（有多个知识库时）：
-
-```bash
-qmd query "支付流程" --collections ux-research,product-wiki
-```
-
-**带重排序**（提升结果质量）：
-
-```bash
-qmd query "支付流程痛点" --rerank
-```
+**搜索结果即为候选文件列表**，按相关性得分排序。取 top 5~10 进入下一步。
 
 ---
 
-### 步骤 4：读取相关页面内容
+### 步骤 2：读取 index.md（辅助，仅用于补全盲区）
 
-根据搜索结果，读取最相关的页面：
+读取搜索结果后，**可选**地扫描 `index.md`，检查是否有 qmd 搜索遗漏的明显相关页面：
+
+```bash
+cat "{{WIKI_PATH}}/wiki/index.md"
+```
+
+> 注意：index.md 的作用是**补充 qmd 可能的盲区**，而不是替代 qmd 的搜索结果。
+> 如果 qmd 已返回 10 个相关结果，可跳过此步骤。
+
+---
+
+### 步骤 3：读取 qmd 返回的候选文件
+
+根据步骤 1 的搜索结果，读取最相关的页面：
 
 ```bash
 # 读取单个页面
