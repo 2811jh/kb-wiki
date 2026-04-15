@@ -22,6 +22,30 @@ node --version
 请前往 https://nodejs.org 下载最新 LTS 版本后重新运行 /setup。
 ```
 
+各平台快速安装命令：
+
+Windows（PowerShell，推荐使用 nvm-windows）：
+```powershell
+winget install CoreyButler.NVMforWindows
+nvm install 22
+nvm use 22
+```
+
+macOS（推荐使用 nvm）：
+```bash
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.0/install.sh | bash
+nvm install 22
+nvm use 22
+```
+
+Linux（Ubuntu/Debian）：
+```bash
+curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
+sudo apt-get install -y nodejs
+```
+
+或直接前往 https://nodejs.org 下载 v22 LTS 安装包。
+
 ---
 
 ### 步骤 2：安装并编译 qmd 搜索引擎
@@ -29,6 +53,31 @@ node --version
 qmd 的完整源码已内嵌在 skill 的 `scripts/qmd/` 目录中，但首次使用需要安装依赖并编译。
 
 **自动执行以下命令**（LLM 直接执行，无需用户操作）：
+
+**2.0 确定 skill 安装路径**
+
+LLM 应按以下优先级查找 kb-wiki skill 的安装路径：
+
+```bash
+# 检查常见安装位置（按优先级）
+# 1. Claude Code：.claude/skills/kb-wiki/
+# 2. 通用 agents：.agents/skills/kb-wiki/
+# 3. 用户主目录：~/.skills/kb-wiki/
+
+ls ~/.claude/skills/kb-wiki/scripts/qmd/ 2>/dev/null || \
+ls ~/.agents/skills/kb-wiki/scripts/qmd/ 2>/dev/null || \
+ls ~/.skills/kb-wiki/scripts/qmd/ 2>/dev/null
+```
+
+找到后记录为 `SKILL_PATH`，后续 qmd 路径为：
+`SKILL_PATH/scripts/qmd/dist/cli/qmd.js`
+
+Windows 等价：
+```powershell
+# 检查常见安装位置
+Test-Path "$env:USERPROFILE\.agents\skills\kb-wiki\scripts\qmd"
+Test-Path "$env:USERPROFILE\.claude\skills\kb-wiki\scripts\qmd"
+```
 
 ```bash
 # 2.1 检测 pnpm 是否可用
@@ -209,13 +258,431 @@ New-Item -ItemType Directory -Force -Path "{{WIKI_PATH}}\wiki\synthesis"
 
 ### 步骤 6：复制并填充 CLAUDE.md 模板
 
-读取 skill 包中的 `templates/CLAUDE.md.template`，将以下占位符替换：
+将以下占位符替换后写入 `{{WIKI_PATH}}/CLAUDE.md`：
 
 | 占位符 | 替换为 |
 |--------|--------|
 | `{{WIKI_NAME}}` | 用户输入的知识库名称 |
 | `{{WIKI_PATH}}` | 知识库完整路径 |
 | `{{CURRENT_DATE}}` | 当前日期（格式：YYYY-MM-DD） |
+
+以下是 CLAUDE.md 的完整模板内容（将 `{{WIKI_NAME}}`、`{{WIKI_PATH}}`、`{{CURRENT_DATE}}` 替换为实际值后写入文件）：
+
+````markdown
+# {{WIKI_NAME}} 知识库规范（CLAUDE.md）
+
+> **这是知识库的 Schema 层文件**，告诉 LLM 如何工作。
+> 创建于：{{CURRENT_DATE}}
+> 知识库路径：{{WIKI_PATH}}
+>
+> **演进说明**：这个文件是可以修改的。随着你使用知识库，你和 LLM 可以共同修改这里的规范，
+> 使其更贴合你的研究领域、工作习惯和偏好。这是 kb-wiki 适应个人需求的核心机制。
+
+---
+
+## 1. 知识库概述
+
+**名称**：{{WIKI_NAME}}
+
+**用途**：[请描述这个知识库的主要用途，例如：UX 研究知识库，用于积累和查询用户访谈、竞品分析、用户体验研究资料]
+
+**主要领域**：[例如：用户体验研究 / 产品设计 / 竞品分析 / 用户行为研究]
+
+**目标用户**：[例如：UX 研究员、产品经理、设计师]
+
+**语言**：中文（所有 wiki 页面使用中文，资料可以是任何语言）
+
+> **CLAUDE.md 的核心目标**：让 LLM 成为训练有素的 Wiki 维护者，而非通用聊天机器人。这份规范定义了 LLM 的工作方式。
+
+---
+
+## 2. 目录结构说明
+
+```
+{{WIKI_PATH}}/
+├── CLAUDE.md              ← 本文件（Schema 层，告诉 LLM 如何工作）
+│
+├── raw/                   ← 原始资料层（只读，LLM 不可修改）
+│   ├── articles/          ← 文章、访谈记录、新闻稿
+│   ├── papers/            ← 学术论文、研究报告
+│   ├── assets/            ← 图片、截图等媒体文件
+│   └── data/              ← 数据文件（CSV、JSON 等）
+│
+└── wiki/                  ← Wiki 层（LLM 完全掌控）
+    ├── entities/          ← 实体页面
+    │                         用户画像、产品功能、组织、竞品等
+    ├── concepts/          ← 概念页面
+    │                         用户痛点、行为模式、设计模式、研究发现等
+    ├── sources/           ← 资料摘要页面
+    │                         每份原始资料对应一个摘要页，不可替代原始资料
+    ├── synthesis/         ← 综合分析页面
+    │                         对比分析、概览、跨资料结论、洞察归档、行动建议
+    ├── index.md           ← 内容目录（每次 ingest 必须更新）
+    └── log.md             ← 操作日志（append-only，知识库演进的时间线，帮助 LLM 理解近期动态）
+```
+
+---
+
+## 3. 重要原则
+
+### LLM 的职责边界
+
+1. **raw/ 目录绝对只读**：永远不要修改 `raw/` 中的任何文件。这是原始来源的真相，不可改变。
+2. **wiki/ 目录 LLM 完全掌控**：可以自由创建、修改、重组 `wiki/` 中的所有页面。
+3. **用户不需要手动编写 Wiki**：所有 wiki 内容由 LLM 生成和维护。用户只负责提供资料、进行探索和提问。
+4. **log.md 只追加**：只在末尾添加记录，不删改已有历史记录。
+
+### 知识质量原则
+
+5. **交叉引用是价值所在**：每次 ingest 都要主动创建页面之间的关联，这是知识复利的核心。
+6. **标注矛盾，不隐藏矛盾**：发现不一致时，明确标注 `⚠️ 矛盾`，不要静默覆盖。
+7. **综合结论要反映所有来源**：`synthesis/` 页面要综合所有相关资料，不偏向单一来源。
+8. **好的查询结果值得归档**：有价值的分析结论保存到 `synthesis/`，避免重复工作。
+
+---
+
+## 4. Ingest 工作流（导入新资料）
+
+当用户运行 `/ingest` 时，按以下 10 步执行：
+
+1. **读取资料**：读取 `raw/` 中的原始文件，或用户提供的文本内容
+2. **理解要点**：提取关键发现、重要引述、涉及的用户/产品/概念
+3. **写摘要页面**：在 `wiki/sources/` 创建摘要页面（格式见下方第 8 节）
+4. **更新 index.md**：在对应分类下添加新页面条目（格式：`[[页面名]] - 摘要 | 来源数`）
+5. **更新 entities/**：更新或创建本次资料涉及的实体页面（用户、产品、组织等）
+6. **更新 concepts/**：更新或创建本次资料涉及的概念页面（痛点、行为模式等）
+7. **检查矛盾**：对比新资料与现有 wiki 内容，用 `⚠️ 矛盾` 标注发现的冲突
+8. **更新综合结论**：在 `synthesis/` 相关页面中强化或修订已有结论
+9. **记录日志**：在 `wiki/log.md` 末尾追加记录（格式：`## [YYYY-MM-DD] ingest | 资料标题`）
+10. **重建索引**：运行 `qmd update` 重建 qmd 搜索索引
+
+**完成后汇报**：告知用户更新了哪些页面（新建/更新），发现了哪些矛盾，修订了哪些综合结论。
+
+---
+
+## 5. Query 工作流（查询知识库）
+
+当用户运行 `/query` 时，按以下步骤执行：
+
+1. **读取 index.md**：了解知识库全貌，定位相关页面
+2. **执行 qmd 搜索**：优先使用 `qmd query "问题"` 混合搜索
+3. **读取相关页面**：通过 `qmd get` 或 `qmd multi-get` 读取搜索结果中的页面
+4. **生成综合答案**：基于多个页面的内容，综合生成答案（带引用，标注置信度）
+5. **标注矛盾**：如果不同来源有冲突，明确指出
+6. **询问是否归档**：询问用户是否将本次分析归档到 `wiki/synthesis/`
+7. **归档并记录**（如确认）：创建 synthesis 页面，更新 index.md，在 log.md 追加记录
+
+**答案格式**：优先使用 Markdown，可根据需求切换为表格、Marp 幻灯片、行动项清单等形式。
+
+---
+
+## 6. Lint 工作流（健康检查）
+
+当用户运行 `/lint` 时，执行以下 7 项检查：
+
+1. **矛盾论断检测**：找出不同页面间相互冲突的论断
+2. **过时论断检测**：找出被更新资料取代但未更新的旧结论
+3. **孤立页面检测**：找出没有入站链接的页面
+4. **缺失页面检测**：找出被引用但实际不存在的页面
+5. **缺失交叉引用检测**：找出语义相关但未互链的页面对
+6. **数据空白检测**：识别缺失的重要信息和研究方向
+7. **日志完整性检查**：确认 log.md 格式正确，记录完整
+
+**输出**：结构化的 Lint 报告，包含总览表格、详细问题列表、修复建议（按优先级）、推荐探索方向。
+
+**完成后记录**：在 log.md 追加 `## [YYYY-MM-DD] lint | N issues found`
+
+---
+
+## 7. Lint 提醒规则
+
+每完成 **5 次** `/ingest` 操作后，在回复末尾自动追加：
+
+```
+---
+💡 **知识库健康提醒**：你已经导入了 5 份新资料（自上次健康检查以来）。
+建议运行 `/lint` 检查知识库健康状态（矛盾、孤立页面、缺失引用等）。
+---
+```
+
+**计数方法**：读取 `wiki/log.md`，统计最后一条 `lint` 记录之后的 `ingest` 记录数量。
+
+```bash
+grep "^## \[" wiki/log.md | tail -20
+```
+
+---
+
+## 8. 页面格式规范
+
+### 所有 wiki 页面必须包含 YAML frontmatter
+
+```yaml
+---
+title: 页面标题（与 H1 一致）
+date: YYYY-MM-DD（最后更新日期，每次修改时更新）
+tags: [标签1, 标签2, 标签3]
+sources: [sources/相关摘要1, sources/相关摘要2]
+related: [entities/实体页, concepts/概念页, synthesis/综合页]
+---
+```
+
+### 交叉引用格式
+
+优先使用 Obsidian 风格（方便在 Obsidian 中导航）：
+
+```markdown
+[[页面名]]              ← 同目录引用
+[[entities/用户-A]]    ← 跨目录引用（推荐写法）
+```
+
+标准 Markdown 格式（作为备选）：
+
+```markdown
+[用户 A 的完整画像](../entities/用户-A.md)
+```
+
+### 特殊标注格式
+
+```markdown
+> ⚠️ **矛盾**：[[sources/资料A]] 认为 X，但 [[sources/资料B]] 显示 Y。
+> 可能原因：...  建议：通过 [...] 方式进一步验证。
+
+> 💡 **综合结论**：基于 N 份资料，[结论]。
+> 置信度：高/中/低（来源数量和一致性）
+
+> ❓ **待验证**：[论断] 目前仅有 1 份资料支撑，需要更多证据。
+
+> 🔄 **已更新**：此结论已被 [[sources/新资料]] 取代，
+> 最新观点见 [[concepts/新页面]] 第 X 节。
+```
+
+### sources/ 摘要页面结构
+
+```markdown
+---
+title: 资料标题
+date: YYYY-MM-DD
+tags: [资料类型, 主题标签]
+sources: [raw/articles/原始文件名.md]
+related: [entities/..., concepts/...]
+---
+
+# 资料标题
+
+## 来源信息
+- 原始文件、日期、类型、作者/对象
+
+## 核心发现
+- 分主题列出主要发现
+
+## 关键引述
+> "原文引用" —— 来源
+
+## 与现有知识的关联
+- 强化或挑战哪些已有页面
+
+## 综合意义
+> 💡 **综合结论**：...
+```
+
+### entities/ 实体页面结构
+
+```markdown
+---
+title: 实体名称
+date: YYYY-MM-DD
+tags: [实体类型, 标签]
+sources: [sources/...]
+related: [concepts/...]
+---
+
+# 实体名称
+
+## 基本信息
+- 关键属性列表
+
+## 与本知识库相关的核心信息
+- 分主题展示，每条都有来源引用
+
+## 来源资料
+- [[sources/...]]（日期）：一行说明
+```
+
+### concepts/ 概念页面结构
+
+```markdown
+---
+title: 概念名称
+date: YYYY-MM-DD
+tags: [概念类型, 标签]
+sources: [sources/...]
+related: [entities/..., concepts/..., synthesis/...]
+---
+
+# 概念名称
+
+## 当前认知（基于 N 份资料）
+综合描述 + 💡 综合结论
+
+## 具体表现/证据
+分来源列出，每条有引用
+
+## 矛盾与待解问题
+⚠️ 矛盾标注 + ❓ 待验证
+
+## 资料来源
+来源列表
+```
+
+---
+
+## 9. index.md 格式规范
+
+```markdown
+# {{WIKI_NAME}} 知识库索引
+
+> 最后更新：YYYY-MM-DD
+> 总页面数：N | sources: x | entities: x | concepts: x | synthesis: x
+
+---
+
+## sources/（资料摘要）
+
+[[资料名-1]] - 一行摘要描述 `| 1`
+[[资料名-2]] - 一行摘要描述 `| 1`
+
+---
+
+## entities/（实体页面）
+
+[[实体名-1]] - 一行描述 `| 来源数`
+
+---
+
+## concepts/（概念页面）
+
+[[概念名-1]] - 一行描述 `| 来源数`
+
+---
+
+## synthesis/（综合分析）
+
+[[分析名-1]] - 一行描述 `| 来源数`
+```
+
+**规则**：
+- 每次 ingest 后必须更新 index.md
+- 每行格式：`[[页面名]] - 一行摘要 \`| 来源数\``
+- 来源数 = 该页面引用的 sources/ 摘要数量
+- 查询时先读 index.md 定位相关页面
+
+---
+
+## 10. log.md 格式规范
+
+```markdown
+# 操作日志
+
+> 此文件记录所有 ingest、query（归档）、lint 操作。
+> 格式：## [YYYY-MM-DD] ingest/query/lint | 标题
+> 规则：只允许追加，不允许删改历史记录。
+> 解析：grep "^## \[" log.md | tail -10
+
+---
+
+## [2026-01-15] ingest | 用户访谈 - 2026年1月
+
+- 来源文件：raw/articles/user-interview-2026-01.md
+- 更新页面：sources/用户访谈-2026-01（新建）、entities/用户-A（更新）
+- 矛盾标注：0 处
+- 修订综合结论：1 处
+
+## [2026-01-20] query | 支付流程用户痛点
+
+- 归档到：synthesis/支付流程痛点分析.md
+
+## [2026-01-25] lint | 3 issues found
+
+- 矛盾: 1 | 孤立页面: 1 | 数据空白: 1
+```
+
+**格式要求**：
+- 标题行必须以 `## [YYYY-MM-DD]` 开头（行首，无缩进）
+- 支持 `grep "^## \[" log.md | tail -5` 解析最近操作
+- 支持 `grep "^## \[" log.md | grep "ingest" | wc -l` 统计 ingest 次数
+
+---
+
+## 11. qmd 工具使用说明
+
+```bash
+# 集合名称（由 /setup 配置）
+集合名称：{{WIKI_NAME}}
+集合路径：{{WIKI_PATH}}/wiki
+
+# 常用命令
+qmd query "问题"                           ← 混合搜索（推荐，大多数场景）
+qmd search "关键词" --collection {{WIKI_NAME}}  ← 精确关键词搜索
+qmd vsearch "描述" --collection {{WIKI_NAME}}   ← 语义搜索（需 qmd embed）
+qmd get wiki/concepts/页面.md             ← 读取单个页面
+qmd multi-get "wiki/entities/*.md"        ← 批量读取
+qmd ls --collection {{WIKI_NAME}}         ← 列出所有 wiki 页面
+qmd update                                 ← 重建索引（每次 ingest 后）
+qmd embed --chunk-strategy auto            ← 生成向量嵌入（用于语义搜索）
+qmd status                                 ← 查看索引状态
+qmd mcp                                    ← 启动 MCP server（stdio 模式）
+```
+
+---
+
+## 12. 如何演进此规范
+
+这个文件（CLAUDE.md）是**可以也应该被修改的**。随着你使用知识库，你和 LLM 可以共同修改这里的规范。
+
+**常见演进场景**：
+
+### 添加新的目录分类
+
+如果你需要新的分类（如 `wiki/personas/` 用于用户画像），在本文件中添加目录说明：
+```markdown
+│   ├── personas/          ← 用户画像（完整人物志，区别于 entities/ 的简要实体页）
+```
+
+### 修改页面格式
+
+如果你的领域有特定的信息结构，修改第 8 节的页面格式规范。
+
+### 自定义 Lint 检查规则
+
+在第 6 节 Lint 工作流中，添加或删除检查项。
+
+### 调整 Lint 提醒频率
+
+修改第 7 节的触发条件（默认每 5 次 ingest 提醒一次）。
+
+### 修改语言设置
+
+如果需要英文或其他语言的 wiki，修改概述部分的语言设置。
+
+### 适配不同的 LLM
+
+如果你使用的是 GPT-4、Gemini 或其他 LLM 而非 Claude，可能需要调整页面格式和工作流指令以适应该 LLM 的特点。例如，不同 LLM 对 Markdown 结构的偏好、上下文窗口大小、工具使用方式可能不同。可以将此文件重命名为 AGENTS.md 或其他适合的名字。
+
+### 替换工具链
+
+kb-wiki 的所有工具（qmd、Obsidian 等）都是推荐但非必须的。你可以根据自己的偏好替换为其他工具：
+- 搜索引擎：替换 qmd 为其他 Markdown 搜索工具
+- 编辑器：替换 Obsidian 为 VS Code、Logseq、Notion 等
+- 版本控制：替换 git 为其他方案
+
+确切的目录结构、规范约定、页面格式、工具链——所有这些都取决于你的领域、你的偏好以及你选择的 LLM。
+
+---
+
+> **提示**：每次修改 CLAUDE.md 时，建议在 log.md 中追加一条记录：
+> `## [YYYY-MM-DD] setup | 更新 CLAUDE.md - [修改摘要]`
+````
 
 将结果写入 `{{WIKI_PATH}}/CLAUDE.md`。
 

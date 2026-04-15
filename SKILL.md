@@ -45,10 +45,10 @@ your-wiki/
 
 | 用户可能说的话（自然语言） | 等价命令 | 执行内容 | 参考文档 |
 |--------------------------|---------|---------|---------|
-| "帮我初始化知识库"、"创建一个新的知识库" | `/setup` | 首次初始化：创建目录、生成 CLAUDE.md、配置 qmd | [setup.md](setup.md) |
-| "帮我处理这篇文章"、"导入这个文件"、"我放了一篇新论文在 raw/ 里" | `/ingest` | 导入资料，自动更新 10-15 个 wiki 页面 | [ingest.md](ingest.md) |
-| "用户支付的痛点是什么？"、"总结一下竞品分析"、任何针对知识库的提问 | `/query` | 搜索知识库，综合答案，可选归档到 synthesis/ | [query.md](query.md) |
-| "检查一下知识库"、"有没有矛盾的内容"、"知识库健康状况" | `/lint` | 健康检查：矛盾、孤立页面、过时论断、缺失引用 | [lint.md](lint.md) |
+| "帮我初始化知识库"、"创建一个新的知识库" | `/setup` | 首次初始化：创建目录、生成 CLAUDE.md、配置 qmd | [setup.md](skills/setup.md) |
+| "帮我处理这篇文章"、"导入这个文件"、"我放了一篇新论文在 raw/ 里" | `/ingest` | 导入资料，自动更新 10-15 个 wiki 页面 | [ingest.md](skills/ingest.md) |
+| "用户支付的痛点是什么？"、"总结一下竞品分析"、任何针对知识库的提问 | `/query` | 搜索知识库，综合答案，可选归档到 synthesis/ | [query.md](skills/query.md) |
+| "检查一下知识库"、"有没有矛盾的内容"、"知识库健康状况" | `/lint` | 健康检查：矛盾、孤立页面、过时论断、缺失引用 | [lint.md](skills/lint.md) |
 | "知识库有多少页面了"、"看看索引状态" | `/status` | 显示 wiki 统计 + qmd 索引状态 | — |
 
 > **路由优先级**：如果用户输入了显式 `/` 命令（如 `/ingest raw/articles/xxx.md`），直接执行对应工作流，无需确认。如果是自然语言，LLM 应先识别意图，必要时向用户确认后再执行。
@@ -57,7 +57,7 @@ your-wiki/
 
 ## 首次使用流程
 
-当用户首次运行 `/setup` 时，按以下步骤执行（详见 [setup.md](setup.md)）：
+当用户首次运行 `/setup` 时，按以下步骤执行（详见 [setup.md](skills/setup.md)）：
 
 ### 步骤 1：检测依赖
 
@@ -201,11 +201,11 @@ grep "^## \[" wiki/log.md | tail -20 | grep "ingest" | wc -l
 
 | 文档 | 内容 |
 |------|------|
-| [setup.md](setup.md) | 完整安装引导流程 |
-| [ingest.md](ingest.md) | 导入资料详细工作流（10 步） |
-| [query.md](query.md) | 查询知识库详细工作流 |
-| [lint.md](lint.md) | 健康检查详细流程（7 项检查） |
-| [qmd-reference.md](qmd-reference.md) | qmd 工具完整命令参考 |
+| [setup.md](skills/setup.md) | 完整安装引导流程 |
+| [ingest.md](skills/ingest.md) | 导入资料详细工作流（10 步） |
+| [query.md](skills/query.md) | 查询知识库详细工作流 |
+| [lint.md](skills/lint.md) | 健康检查详细流程（7 项检查） |
+| [qmd-reference.md](skills/qmd-reference.md) | qmd 工具完整命令参考 |
 
 ---
 
