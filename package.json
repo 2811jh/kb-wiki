@@ -6,9 +6,6 @@
     "kb-wiki": "./bin/cli.js",
     "qmd": "./bin/qmd.js"
   },
-  "scripts": {
-    "postinstall": "node bin/postinstall.js"
-  },
   "files": [
     "bin/",
     "skills/",
