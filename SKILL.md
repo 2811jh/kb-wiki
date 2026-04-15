@@ -17,7 +17,7 @@ description: Use when 用户需要建立、导入、查询或维护基于 llm-wi
 
 ```
 your-wiki/
-├── CLAUDE.md          ← Schema 层（LLM 的工作规范，用户可自定义演进）
+├── Schema.md          ← Schema 层（LLM 的工作规范，用户可自定义演进）
 ├── raw/               ← 原始资料层（只读，LLM 读取来源，绝不修改）
 │   ├── articles/
 │   ├── papers/
@@ -35,7 +35,7 @@ your-wiki/
 **三层职责**：
 - **raw/**：原始输入，不可变，是知识的来源
 - **wiki/**：知识的提炼产物，LLM 负责构建和维护所有交叉引用、矛盾标注、综合结论
-- **CLAUDE.md**：规范层，让 LLM 成为训练有素的 Wiki 维护者而非通用聊天机器人，随使用逐步演进
+- **Schema.md**：规范层，让 LLM 成为训练有素的 Wiki 维护者而非通用聊天机器人，随使用逐步演进
 
 ---
 
@@ -45,7 +45,7 @@ your-wiki/
 
 | 用户可能说的话（自然语言） | 等价命令 | 执行内容 | 参考文档 |
 |--------------------------|---------|---------|---------|
-| "帮我初始化知识库"、"创建一个新的知识库" | `/setup` | 首次初始化：创建目录、生成 CLAUDE.md、配置 qmd | [setup.md](skills/setup.md) |
+| "帮我初始化知识库"、"创建一个新的知识库" | `/setup` | 首次初始化：创建目录、生成 Schema.md、配置 qmd | [setup.md](skills/setup.md) |
 | "帮我处理这篇文章"、"导入这个文件"、"我放了一篇新论文在 raw/ 里" | `/ingest` | 导入资料，自动更新 10-15 个 wiki 页面 | [ingest.md](skills/ingest.md) |
 | "用户支付的痛点是什么？"、"总结一下竞品分析"、任何针对知识库的提问 | `/query` | 搜索知识库，综合答案，可选归档到 synthesis/ | [query.md](skills/query.md) |
 | "检查一下知识库"、"有没有矛盾的内容"、"知识库健康状况" | `/lint` | 健康检查：矛盾、孤立页面、过时论断、缺失引用 | [lint.md](skills/lint.md) |
@@ -95,7 +95,7 @@ mkdir -p <知识库路径>/wiki/synthesis
 
 ### 步骤 4：生成初始文件
 
-1. 将 `templates/CLAUDE.md.template` 中 `{{WIKI_NAME}}` 替换为实际名称，复制为 `<知识库路径>/CLAUDE.md`
+1. 将 `templates/Schema.md.template` 中 `{{WIKI_NAME}}` 替换为实际名称，复制为 `<知识库路径>/Schema.md`
 2. 创建 `<知识库路径>/wiki/index.md`（空目录文件）
 3. 创建 `<知识库路径>/wiki/log.md`（空日志文件）
 
@@ -175,6 +175,8 @@ grep "^## \[" wiki/log.md | tail -20 | grep "ingest" | wc -l
 
 ## 重要原则
 
+> **文件命名**：wiki 页面采用"中文描述 + 英文 slug"格式，如 `服务器产品特征server-features.md`，便于 Obsidian 图谱中直观识别。
+
 ### LLM 的职责
 
 1. **LLM 负责写，用户负责读**：用户永远不需要手动编写任何 Wiki 内容。用户负责寻找资料来源、进行探索性提问，以及引导分析方向。
@@ -193,7 +195,7 @@ grep "^## \[" wiki/log.md | tail -20 | grep "ingest" | wc -l
 
 ### Schema 演进原则
 
-11. **CLAUDE.md 是可演进的**：用户可以根据自己的领域、偏好修改 CLAUDE.md，告诉 LLM 不同的工作方式。这是 kb-wiki 适应不同使用场景的关键机制。
+11. **Schema.md 是可演进的**：用户可以根据自己的领域、偏好修改 Schema.md，告诉 LLM 不同的工作方式。这是 kb-wiki 适应不同使用场景的关键机制。
 
 ---
 
@@ -217,10 +219,10 @@ grep "^## \[" wiki/log.md | tail -20 | grep "ingest" | wc -l
 2. Wiki 是持久的不断复利增长的知识产物，交叉引用已建立，矛盾已标记，综合结论反映所有阅读内容
 3. 用户永远不需要自己编写 Wiki 内容，LLM 负责一切编写和维护
 4. 用户能一边打开 LLM 智能体，一边打开 Obsidian，LLM 编辑，用户实时浏览
-5. 三层架构：Raw sources + Wiki 层 + Schema 层（CLAUDE.md）
+5. 三层架构：Raw sources + Wiki 层 + Schema 层（Schema.md）
 6. 三种操作：Ingest、Query、Lint
 7. 两个特殊文件：index.md（内容目录）+ log.md（append-only 操作日志）
 8. 可选 CLI 工具：qmd（本地搜索引擎，CLI + MCP 双模式）
 9. 技巧：Obsidian Web Clipper、本地图片、图谱视图、Marp、Dataview、git
 10. 为什么有效：繁重的维护工作由 LLM 完成，人类负责策划来源和引导分析
-11. 目录结构、Schema 约定等取决于用户领域，通过 CLAUDE.md 自定义演进
+11. 目录结构、Schema 约定等取决于用户领域，通过 Schema.md 自定义演进
