@@ -24,51 +24,68 @@ node --version
 
 ---
 
-### 步骤 2：验证 qmd 已就绪
+### 步骤 2：安装并编译 qmd 搜索引擎
 
-qmd 在 `npx skills add` 安装 skill 时已通过 `postinstall` 钩子自动完成依赖安装和编译（跨平台 Node.js 脚本，Windows/macOS/Linux 均支持）。此步骤仅做验证：
+qmd 的完整源码已内嵌在 skill 的 `scripts/qmd/` 目录中，但首次使用需要安装依赖并编译。
 
-```bash
-node <skill安装路径>/scripts/qmd/dist/cli/qmd.js --version
-```
-
-**如果 qmd 正常**：
-```
-✅ qmd 已就绪（版本：x.x.x），继续创建知识库。
-```
-
-**如果 qmd 不可用**（可能是 postinstall 失败），手动修复：
+**自动执行以下命令**（LLM 直接执行，无需用户操作）：
 
 ```bash
+# 2.1 检测 pnpm 是否可用
+pnpm --version
+# 如果 pnpm 不可用，先安装：
+npm install -g pnpm
+
+# 2.2 进入 qmd 目录安装依赖
 cd <skill安装路径>/scripts/qmd
-pnpm install --no-frozen-lockfile   # 如果没有 pnpm，先 npm install -g pnpm
-npx tsc -p tsconfig.build.json     # 编译 TypeScript
+pnpm install --no-frozen-lockfile
+
+# 2.3 编译 TypeScript
+npx tsc -p tsconfig.build.json
+
+# 2.4 验证编译成功
+node dist/cli/qmd.js --version
 ```
 
-如果仍然失败，告知用户：
+> ⚠️ 注意：`<skill安装路径>` 是 `npx skills add` 安装 skill 到本地的路径。LLM 应自动检测此路径（通常在 `~/.skills/` 或 `.agents/skills/` 下）。
+
+**编译成功**：
 ```
-⚠️ qmd 暂时不可用。常见原因：
+✅ qmd 搜索引擎编译成功（版本：x.x.x）！
+   qmd 是本地 Markdown 搜索引擎（BM25 + 向量混合搜索），完全在本地运行。
+```
+
+**如果 pnpm install 失败**，尝试回退到 npm：
+```bash
+npm install
+npx tsc -p tsconfig.build.json
+```
+
+**如果仍然失败**，告知用户：
+```
+⚠️ qmd 编译失败。常见原因：
    - 缺少 C++ 编译工具（Windows: Visual Studio Build Tools, macOS: xcode-select --install）
-   - Node.js 版本 < 22
+   - Node.js 版本 < 22（当前版本：<版本号>）
    
    不影响知识库的基本功能（ingest/lint 仍可正常使用），
-   但 /query 命令将无法使用混合搜索功能。
+   但 /query 的混合搜索功能暂时不可用。
+   解决问题后可重新运行 /setup 来编译 qmd。
 ```
 
-**LLM 调用 qmd 的方式**：
-
-skill 已在 `package.json` 中注册了 `qmd` 命令（`bin/qmd.js` 包装脚本）。安装 skill 后，LLM 可直接调用：
+**LLM 调用 qmd 的方式**（编译成功后，所有后续命令统一用此方式）：
 
 ```bash
-# 方式 1（推荐）：直接用 qmd 命令（npm 全局链接）
-qmd query "用户痛点"
-qmd update
-qmd collection list
+# 直接用 node 调用编译后的入口
+node <skill安装路径>/scripts/qmd/dist/cli/qmd.js <命令> [参数]
 
-# 方式 2：通过 node 调用包装脚本（如果全局命令不可用）
-node <skill安装路径>/bin/qmd.js query "用户痛点"
-node <skill安装路径>/bin/qmd.js update
+# 例如：
+node <skill安装路径>/scripts/qmd/dist/cli/qmd.js query "用户痛点"
+node <skill安装路径>/scripts/qmd/dist/cli/qmd.js update
+node <skill安装路径>/scripts/qmd/dist/cli/qmd.js collection list
+node <skill安装路径>/scripts/qmd/dist/cli/qmd.js embed
 ```
+
+> 💡 LLM 应在 setup 完成后记住 qmd 的完整调用路径，后续 ingest/query 时直接使用。
 
 ### 步骤 2.5：配置 HuggingFace 镜像（中国大陆用户）
 
