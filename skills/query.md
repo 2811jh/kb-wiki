@@ -42,12 +42,45 @@ cat "{{WIKI_PATH}}/wiki/index.md"
 
 ---
 
-### 步骤 3：执行 qmd 搜索
+### 步骤 3：检查向量索引 & 执行 qmd 搜索
 
-**基础查询（推荐）**：
+**首先确认向量索引是否存在**（首次使用语义搜索前必须执行）：
 
 ```bash
-qmd query "支付流程用户痛点" --collection ux-research
+node <SKILL_PATH>/scripts/qmd/dist/cli/qmd.js status --collection {{WIKI_NAME}}
+```
+
+- 如果状态显示**无向量索引**，告知用户：
+
+  ```
+  ⚠️ 尚未建立向量索引，语义搜索（vsearch / query）功能不可用。
+  
+  现在建立向量索引需要下载 AI 模型（约 1.3~2GB），首次下载较慢。
+  是否现在建立？（建议在 ingest 几篇资料后再建立，效果更好）
+  
+  选项：
+  1. 现在建立（运行 qmd embed，需下载模型）
+  2. 暂时跳过（本次查询仅使用 BM25 关键词搜索）
+  ```
+
+  **用户选择"现在建立"**，执行：
+  ```bash
+  # 中国大陆用户先确认 HF_ENDPOINT 已设置
+  node <SKILL_PATH>/scripts/qmd/dist/cli/qmd.js embed --chunk-strategy auto --collection {{WIKI_NAME}}
+  ```
+  > 首次运行会自动下载 embeddinggemma-300M（~300MB）和 qmd-query-expansion-1.7B（~1GB）。下载完成后自动 embed，无需其他操作。
+
+  **用户选择"暂时跳过"**，改用 BM25 搜索：
+  ```bash
+  node <SKILL_PATH>/scripts/qmd/dist/cli/qmd.js search "{{查询关键词}}" --collection {{WIKI_NAME}}
+  ```
+
+- 如果向量索引**已存在**，直接进行搜索。
+
+**基础查询（推荐，需向量索引）**：
+
+```bash
+node <SKILL_PATH>/scripts/qmd/dist/cli/qmd.js query "支付流程用户痛点" --collection {{WIKI_NAME}}
 ```
 
 **精确关键词搜索**：
