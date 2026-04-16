@@ -215,9 +215,28 @@ def validate_image(path: Path) -> bool:
         return False
 
 
+def _derive_source_name(file_path: str) -> str:
+    """Derive a filesystem-safe source name from the input file path.
+
+    Rules:
+    - Start with the file stem (no extension).
+    - Strip bracket prefixes like ``[UX]``, ``[G79]``.
+    - Replace ``&`` with empty string.
+    - If nothing remains, fall back to the original stem.
+    """
+    stem = Path(file_path).stem
+    name = re.sub(r'\[.*?\]', '', stem).strip()
+    name = name.replace('&', '')
+    if not name:
+        name = stem
+    return name
+
+
 def extract_xlsx_images(file_path: str, images_dir: Path) -> List[Dict]:
     """Extract embedded images from an .xlsx file (which is a ZIP)."""
     images_info: List[Dict] = []
+    source_name = _derive_source_name(file_path)
+    img_counter = 0
     try:
         with zipfile.ZipFile(file_path, "r") as zf:
             media_files = [
@@ -233,8 +252,9 @@ def extract_xlsx_images(file_path: str, images_dir: Path) -> List[Dict]:
                     if len(data) < 100:
                         continue
 
+                    img_counter += 1
                     ext = Path(media_file).suffix.lower().lstrip(".")
-                    fname = f"{uuid.uuid4()}.{ext}"
+                    fname = f"{source_name}_img{img_counter}.{ext}"
                     dest = images_dir / fname
 
                     dest.parent.mkdir(parents=True, exist_ok=True)
@@ -305,20 +325,25 @@ def parse_xlsx(file_path: str, images_dir: Path) -> Dict:
 
         # Append images that belong to this sheet (if mapping exists)
         sheet_images = [i for i in images_info if i.get("sheet") == sheet_name]
-        for img in sheet_images:
+        if sheet_images:
+            source_name = _derive_source_name(file_path)
+        for idx, img in enumerate(sheet_images, 1):
             rel = os.path.relpath(img["path"], images_dir.parent).replace("\\", "/")
-            markdown_lines.append(f"![{img['filename']}]({rel})")
+            alt_text = f"{source_name}-图{idx}"
+            markdown_lines.append(f"![{alt_text}]({rel})")
         if sheet_images:
             markdown_lines.append("")
 
     # Images that weren't assigned to a specific sheet — append at the end
     unassigned = [i for i in images_info if "sheet" not in i or i.get("sheet") is None]
     if unassigned:
+        source_name = _derive_source_name(file_path)
         markdown_lines.append("## Images")
         markdown_lines.append("")
-        for img in unassigned:
+        for idx, img in enumerate(unassigned, 1):
             rel = os.path.relpath(img["path"], images_dir.parent).replace("\\", "/")
-            markdown_lines.append(f"![{img['filename']}]({rel})")
+            alt_text = f"{source_name}-图{idx}"
+            markdown_lines.append(f"![{alt_text}]({rel})")
         markdown_lines.append("")
 
     md_text = clean_markdown(markdown_lines)

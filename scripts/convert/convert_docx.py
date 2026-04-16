@@ -14,7 +14,6 @@ import json
 import os
 import re
 import sys
-import uuid
 from pathlib import Path
 from typing import Dict, List
 
@@ -195,10 +194,11 @@ def validate_image(path: Path) -> bool:
         return False
 
 
-def extract_images(doc, images_dir: Path) -> List[Dict]:
+def extract_images(doc, images_dir: Path, source_name: str) -> List[Dict]:
     """Extract all images from the document relationships and save them."""
     images_dir.mkdir(parents=True, exist_ok=True)
     images_info: List[Dict] = []
+    img_counter = 0
 
     try:
         for rel_id, rel in doc.part.rels.items():
@@ -210,7 +210,8 @@ def extract_images(doc, images_dir: Path) -> List[Dict]:
                     continue
 
                 ext = get_image_extension(image_data)
-                filename = f"{uuid.uuid4()}.{ext}"
+                img_counter += 1
+                filename = f"{source_name}_img{img_counter}.{ext}"
                 dest = images_dir / filename
 
                 with open(dest, 'wb') as f:
@@ -223,6 +224,7 @@ def extract_images(doc, images_dir: Path) -> List[Dict]:
                         "size": len(image_data),
                         "format": ext,
                         "rel_id": rel_id,
+                        "seq": img_counter,
                     })
                 else:
                     dest.unlink(missing_ok=True)
@@ -300,8 +302,14 @@ def convert_docx(input_file: str, output_md: str, images_dir: str) -> Dict:
     # Collect paragraph texts for header/footer detection
     all_paragraphs_text = [p.text.strip() for p in doc.paragraphs if p.text.strip()]
 
+    # Derive source_name from input filename, stripping bracket prefixes
+    stem = input_path.stem
+    source_name = re.sub(r'\[.*?\]', '', stem).strip()
+    if not source_name:
+        source_name = stem
+
     # Extract images
-    images_info = extract_images(doc, img_dir)
+    images_info = extract_images(doc, img_dir, source_name)
 
     # Compute the relative path from the output markdown file to the images dir
     try:
@@ -349,7 +357,8 @@ def convert_docx(input_file: str, output_md: str, images_dir: str) -> Dict:
                 p_images = get_paragraph_images(paragraph, images_info)
                 for img in p_images:
                     rel_img_path = os.path.join(img_rel, img['filename']).replace('\\', '/')
-                    markdown_content.append(f"![Image]({rel_img_path})")
+                    seq = img.get('seq', 0)
+                    markdown_content.append(f"![{source_name}-图{seq}]({rel_img_path})")
                     markdown_content.append("")
                 break
 

@@ -14,7 +14,6 @@ import json
 import os
 import re
 import sys
-import uuid
 from pathlib import Path
 from typing import Dict, List, Optional
 
@@ -171,10 +170,17 @@ def convert_pptx(input_file: str, output_md: str, images_dir: str) -> Dict:
         # On Windows, relpath fails across drives
         img_rel = str(img_dir)
 
+    # Derive source_name for image naming
+    raw_stem = input_path.stem
+    source_name = re.sub(r'\[.*?\]', '', raw_stem).strip()
+    if not source_name:
+        source_name = raw_stem
+
     markdown_content: List[str] = []
     images_info: List[Dict] = []
 
     for slide_idx, slide in enumerate(prs.slides, 1):
+        img_seq = 0  # per-slide image sequence counter
         slide_lines: List[str] = []
         title_text = get_slide_title(slide)
 
@@ -197,7 +203,8 @@ def convert_pptx(input_file: str, output_md: str, images_dir: str) -> Dict:
                         continue
 
                     ext = get_image_extension(image_bytes)
-                    filename = f"{uuid.uuid4()}.{ext}"
+                    img_seq += 1
+                    filename = f"{source_name}_s{slide_idx}_img{img_seq}.{ext}"
                     dest = img_dir / filename
 
                     with open(dest, 'wb') as f:
@@ -205,7 +212,8 @@ def convert_pptx(input_file: str, output_md: str, images_dir: str) -> Dict:
 
                     if validate_image(dest):
                         rel_img_path = os.path.join(img_rel, filename).replace('\\', '/')
-                        slide_lines.append(f"![Image]({rel_img_path})")
+                        alt_text = f"{source_name}-幻灯片{slide_idx}图{img_seq}"
+                        slide_lines.append(f"![{alt_text}]({rel_img_path})")
                         images_info.append({
                             "filename": filename,
                             "path": str(dest),

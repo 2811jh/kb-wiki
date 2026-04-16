@@ -14,12 +14,25 @@ import logging
 import os
 import re
 import sys
-import uuid
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
 import fitz  # PyMuPDF
 from PIL import Image
+
+
+def remove_cjk_spaces(text: str) -> str:
+    """Remove spurious spaces between CJK characters."""
+    text = re.sub(
+        r'([\u4e00-\u9fff\u3000-\u303f\uff00-\uffef])\s+([\u4e00-\u9fff\u3000-\u303f\uff00-\uffef])',
+        r'\1\2', text,
+    )
+    # Apply twice for consecutive CJK chars separated by spaces
+    text = re.sub(
+        r'([\u4e00-\u9fff\u3000-\u303f\uff00-\uffef])\s+([\u4e00-\u9fff\u3000-\u303f\uff00-\uffef])',
+        r'\1\2', text,
+    )
+    return text
 
 # ---------------------------------------------------------------------------
 # Logging
@@ -47,6 +60,7 @@ def extract_pdf_images(
     page,
     page_num: int,
     images_dir: Path,
+    source_name: str = "image",
 ) -> List[Dict]:
     """Extract images from a single PDF page.
 
@@ -71,8 +85,8 @@ def extract_pdf_images(
                     pix = None
                     continue
 
-                image_id = str(uuid.uuid4())
-                image_filename = f"{image_id}.png"
+                seq = len(images_info) + 1
+                image_filename = f"{source_name}_p{page_num + 1}_img{seq}.png"
                 image_path = images_dir / image_filename
 
                 pix.save(str(image_path))
@@ -83,6 +97,8 @@ def extract_pdf_images(
                         "path": str(image_path),
                         "page": page_num + 1,
                         "index": img_index,
+                        "seq": seq,
+                        "source_name": source_name,
                         "width": pix.width,
                         "height": pix.height,
                         "format": "png",
@@ -115,6 +131,7 @@ def process_pdf_text(text: str) -> List[str]:
     """
     lines: List[str] = []
 
+    text = remove_cjk_spaces(text)
     paragraphs = text.split('\n\n')
 
     for para in paragraphs:
@@ -178,6 +195,7 @@ def convert_pdf_table_to_markdown(
                     cleaned_row.append("")
                 else:
                     cell_str = str(cell).strip().replace('\n', ' ').replace('|', '\\|')
+                    cell_str = remove_cjk_spaces(cell_str)
                     cleaned_row.append(cell_str)
             if any(cell for cell in cleaned_row):
                 filtered_data.append(cleaned_row)
@@ -475,7 +493,7 @@ def get_ordered_content_blocks(
                     if text_parts:
                         content_blocks.append({
                             'type': 'text',
-                            'content': " ".join(text_parts),
+                            'content': remove_cjk_spaces(" ".join(text_parts)),
                             'y_pos': y_pos,
                             'sort_key': (y_pos, block_idx),
                         })
@@ -488,9 +506,10 @@ def get_ordered_content_blocks(
                     rel_path = os.path.join(
                         img_rel, img_info['filename']
                     ).replace('\\', '/')
+                    img_alt = f"{img_info.get('source_name', 'Image')}-第{img_info['page']}页图{img_info.get('seq', image_idx + 1)}"
                     content_blocks.append({
                         'type': 'image',
-                        'content': f"![Image]({rel_path})",
+                        'content': f"![{img_alt}]({rel_path})",
                         'y_pos': y_pos,
                         'sort_key': (y_pos, block_idx),
                     })
@@ -547,6 +566,12 @@ def convert_pdf(input_file: str, output_md: str, images_dir: str) -> Dict:
 
     doc = fitz.open(str(input_path))
 
+    # Derive clean source filename (strip bracket prefixes)
+    stem = input_path.stem
+    source_name = re.sub(r'\[.*?\]', '', stem).strip()
+    if not source_name:
+        source_name = stem
+
     total_pages = len(doc)
     logger.info("PDF document has %d pages", total_pages)
 
@@ -568,9 +593,17 @@ def convert_pdf(input_file: str, output_md: str, images_dir: str) -> Dict:
             total_tables += len(tables)
 
             # --- images ---
-            page_images = extract_pdf_images(page, page_num, img_dir)
+            page_images = extract_pdf_images(page, page_num, img_dir, source_name)
             if page_images:
                 all_images.extend(page_images)
+
+            # --- page separator ---
+            if page_num > 0:
+                markdown_content.append("")
+                markdown_content.append("---")
+                markdown_content.append("")
+            markdown_content.append(f"## 第 {page_num + 1} 页")
+            markdown_content.append("")
 
             # --- assemble content ---
             if tables:
@@ -599,7 +632,8 @@ def convert_pdf(input_file: str, output_md: str, images_dir: str) -> Dict:
                     rel_path = os.path.join(
                         img_rel, img_info['filename']
                     ).replace('\\', '/')
-                    markdown_content.append(f"![Image]({rel_path})")
+                    img_alt = f"{source_name}-第{img_info['page']}页图{img_info.get('seq', 0)}"
+                    markdown_content.append(f"![{img_alt}]({rel_path})")
                     markdown_content.append("")
 
         except Exception as exc:
