@@ -913,15 +913,25 @@ Documents
   wiki/           ← LLM 自动管理，无需手动编辑
   Schema.md       ← 知识库规范（可自定义）
 
-🚀 下一步：
-  1. 将第一份资料放入 raw/articles/
-  2. 运行 /ingest raw/articles/你的文件.md
-  3. 用 Obsidian 打开 {{WIKI_PATH}} 实时浏览知识库
+🚀 下一步怎么用：
 
-💡 推荐：安装 Obsidian（https://obsidian.md）并打开此知识库目录，
-   你将能实时看到 LLM 构建的知识图谱。
+  1. 导入资料：把文件放到 raw/ 对应子目录后，直接用自然语言告诉我，比如：
+     · "帮我导入 raw/articles 里的访谈记录"
+     · "我在 raw/data 放了一份 Excel，帮我处理一下"
+     · "导入桌面上的那个 PDF 报告"
+     也可以用命令格式：/ingest raw/articles/xxx.md
 
-💡 支持导入多种格式：.md, .txt, .csv（直接读取），.xlsx, .docx, .pptx, .pdf（自动转换）
+  2. 查询知识库：直接问我问题，比如：
+     · "用户支付的痛点是什么？"
+     · "总结一下所有访谈的发现"
+
+  3. 健康检查：累积多份资料后，对我说 /lint 检查知识库一致性
+
+  4. 在 Obsidian 中浏览：用 Obsidian 打开 {{WIKI_PATH}} 文件夹，
+     可以实时看到我维护的 Wiki 内容和图谱关系
+
+支持导入的格式：.md .txt .csv .xlsx .docx .pptx .pdf .png .jpg 等。
+准备好资料就告诉我！
 ```
 
 ---
