@@ -1,0 +1,20 @@
+# kb-wiki 文件格式转换工具依赖
+# 安装: pip install -r requirements.txt
+
+# Word (.docx) 解析
+python-docx>=0.8.11
+
+# Excel (.xlsx) 解析
+openpyxl>=3.1.0
+
+# Excel (.xls) 旧格式解析
+xlrd>=2.0.1
+
+# PowerPoint (.pptx) 解析
+python-pptx>=1.0.0
+
+# PDF 解析（含表格检测、图片提取）
+PyMuPDF>=1.23.0
+
+# 图片验证和格式检测
+Pillow>=10.0.0

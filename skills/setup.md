@@ -48,6 +48,51 @@ sudo apt-get install -y nodejs
 
 ---
 
+### 步骤 1.5：检测 Python 环境 + 安装文件转换依赖
+
+kb-wiki 支持导入 Excel、Word、PowerPoint、PDF 等非文本格式文件。这些格式的转换需要 Python 环境。
+
+```bash
+python --version
+# 或者
+python3 --version
+```
+
+**判断逻辑**：
+- Python >= 3.10：继续安装依赖
+- 未安装 Python：告知用户（非强制，不影响核心功能）
+
+**安装转换工具依赖**：
+
+```bash
+pip install -r <SKILL_PATH>/scripts/convert/requirements.txt
+```
+
+> 💡 如果用户没有 Python 或不需要非文本格式转换，可以跳过此步骤。
+> 核心功能（.md 文件的 ingest/query/lint）不依赖 Python。
+> 后续需要时可随时运行 `pip install -r <SKILL_PATH>/scripts/convert/requirements.txt` 补装。
+
+**安装成功确认**：
+
+```bash
+python -c "import docx, openpyxl, pptx, fitz; print('✅ 所有转换依赖已就绪')"
+```
+
+**如果安装失败**：
+
+```
+⚠️ 文件转换依赖安装失败。
+核心功能不受影响：
+  - .md / .txt / .csv 文件的 /ingest：✅ 正常
+  - /query、/lint：✅ 正常
+  - .xlsx / .docx / .pptx / .pdf 的自动转换：❌ 不可用
+
+后续需要时，请手动运行：
+  pip install -r <SKILL_PATH>/scripts/convert/requirements.txt
+```
+
+---
+
 ### 步骤 2：安装并编译 qmd 搜索引擎
 
 qmd 的完整源码已内嵌在 skill 的 `scripts/qmd/` 目录中，但首次使用需要安装依赖并编译。

@@ -25,16 +25,77 @@
 
 ## 完整流程（10 步）
 
-### 步骤 1：读取原始资料
+### 步骤 1：检测文件格式 + 读取原始资料
 
-读取用户指定的文件（或用户提供的文本内容）。
+**首先检测文件扩展名**，根据格式决定处理方式：
+
+| 扩展名 | 处理方式 | 说明 |
+|--------|---------|------|
+| `.md`, `.txt`, `.csv` | **直接读取** | LLM 可直接 `read_file` |
+| `.xlsx`, `.xls` | **自动转换** → 读取 | 调用 `convert_xlsx.py` |
+| `.docx` | **自动转换** → 读取 | 调用 `convert_docx.py` |
+| `.pptx` | **自动转换** → 读取 | 调用 `convert_pptx.py` |
+| `.pdf` | **自动转换** → 读取 | 调用 `convert_pdf.py` |
+| `.png`, `.jpg`, `.gif`, `.webp` | **LLM 视觉** | 直接查看图片内容 |
+| `.doc`, `.ppt` | **提示用户** | 建议另存为新格式（.docx/.pptx） |
+
+#### 文本格式（直接读取）
 
 ```bash
-# 读取文件示例
+# .md / .txt / .csv 直接读取
 cat "{{WIKI_PATH}}/raw/articles/user-interview-2024-03.md"
 ```
 
-**确认要点**：
+#### 非文本格式（自动转换后读取）
+
+```bash
+# 1. 确保缓存目录存在
+mkdir -p "{{WIKI_PATH}}/wiki/.cache"
+
+# 2. 调用对应转换脚本（以 Excel 为例）
+python <SKILL_PATH>/scripts/convert/convert_xlsx.py \
+    "{{WIKI_PATH}}/raw/data/Q1.xlsx" \
+    "{{WIKI_PATH}}/wiki/.cache/Q1.xlsx.md" \
+    --images-dir "{{WIKI_PATH}}/raw/assets"
+
+# 3. 读取转换后的 Markdown
+cat "{{WIKI_PATH}}/wiki/.cache/Q1.xlsx.md"
+```
+
+**转换脚本路由表**：
+
+```bash
+# Excel
+python <SKILL_PATH>/scripts/convert/convert_xlsx.py <输入> <输出.md> --images-dir <WIKI_PATH>/raw/assets
+
+# Word
+python <SKILL_PATH>/scripts/convert/convert_docx.py <输入> <输出.md> --images-dir <WIKI_PATH>/raw/assets
+
+# PowerPoint
+python <SKILL_PATH>/scripts/convert/convert_pptx.py <输入> <输出.md> --images-dir <WIKI_PATH>/raw/assets
+
+# PDF
+python <SKILL_PATH>/scripts/convert/convert_pdf.py <输入> <输出.md> --images-dir <WIKI_PATH>/raw/assets
+```
+
+> 💡 转换脚本的 Python 依赖在 `/setup` 阶段已安装。如果运行报错 `ModuleNotFoundError`，请执行：
+> `pip install -r <SKILL_PATH>/scripts/convert/requirements.txt`
+
+#### 图片格式
+
+对于 `.png`, `.jpg`, `.gif`, `.webp` 格式的图片，直接使用 LLM 的视觉能力查看图片内容，将观察到的信息作为资料来源进行 ingest。
+
+#### 不支持的旧格式
+
+对于 `.doc`, `.ppt` 等旧格式，告知用户：
+```
+⚠️ 检测到旧版 Office 格式（.doc/.ppt），无法直接转换。
+请在 Microsoft Office 中「另存为」新格式（.docx/.pptx），然后重新 ingest。
+```
+
+---
+
+**读取完成后，确认要点**：
 - 确认资料类型（访谈、文章、论文、报告、数据等）
 - 确认主要主题（涉及哪些用户、产品、概念）
 - 提取关键信息点（主要发现、引述、数据）
