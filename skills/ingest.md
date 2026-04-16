@@ -449,6 +449,9 @@ Wiki 页面文件名采用**中文描述 + 英文 slug** 的格式，便于在 O
 - `基岩版玩家minecraft-bedrock.md`（实体页）
 - `支付体验分析payment-experience.md`（综合分析页）
 - `汕头服务器内测访谈shantou-server-beta-week1.md`（资料摘要页）
+- `春节满意度调研spring-festival-survey.md`（资料摘要页）
+- `搜索功能痛点search-pain-points.md`（概念页）
+- `竞品对比分析competitor-comparison.md`（综合分析页）
 
 **规则**：
 1. 中文部分：简短描述（4-8个字），代表页面的核心主题

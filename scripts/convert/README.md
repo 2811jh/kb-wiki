@@ -89,4 +89,4 @@ python convert_pdf.py raw/papers/paper.pdf wiki/.cache/paper.pdf.md --images-dir
 
 ## 致谢
 
-转换逻辑参考了 [office-to-md](https://github.com/...) skill 的实现，针对 kb-wiki 场景做了精简适配。
+转换逻辑参考了 office-to-md skill 的实现，针对 kb-wiki 场景做了精简适配。

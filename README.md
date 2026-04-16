@@ -12,13 +12,13 @@
 ## 快速安装
 
 ```bash
-# 第一步：安装 skills CLI（如未安装）
-npm install -g skills
-
-# 第二步：安装 kb-wiki skill
+# 方式一：通过 skills CLI 安装（推荐）
 npx skills add 2811jh/kb-wiki
 
-# 第三步：在 Claude 中初始化知识库
+# 方式二：手动安装（如果 skills CLI 不可用）
+git clone https://github.com/2811jh/kb-wiki.git ~/.agents/skills/kb-wiki
+
+# 安装完成后，在 Claude 中初始化知识库
 /setup
 ```
 
@@ -186,6 +186,7 @@ LLM 无法在一次操作中读取含有内联图片的 Markdown 文件。解决
 | 可读性 | 机器友好 | 人类可直接阅读 |
 | 维护者 | 人类 | LLM |
 | 查询质量 | 依赖相似度 | 依赖语义理解 + 知识综合 |
+| 输入格式 | 纯文本/PDF | Markdown, Excel, Word, PPT, PDF, 图片 |
 
 ---
 
