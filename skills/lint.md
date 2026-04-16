@@ -1,5 +1,7 @@
 # Lint 工作流：知识库健康检查
 
+> ⚠️ 本文档中的 `qmd` 命令均为简写。实际调用：`node <SKILL_PATH>/scripts/qmd/dist/cli/qmd.js <命令>`
+
 > 本文档供 LLM 执行 `/lint` 命令时参考。完整执行以下 7 项检查，输出结构化报告。
 
 ---

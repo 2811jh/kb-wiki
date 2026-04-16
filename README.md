@@ -36,13 +36,14 @@ your-wiki/
 │   ├── papers/        ← 学术论文
 │   ├── assets/        ← 图片等媒体文件
 │   └── data/          ← 数据文件
-└── wiki/              ← Wiki 层：LLM 完全掌控，自动生成和维护
-    ├── entities/      ← 用户、产品、组织等实体页面
-    ├── concepts/      ← 用户痛点、行为模式等概念页面
-    ├── sources/       ← 每份资料的摘要页面
-    ├── synthesis/     ← 综合分析、洞察归档
-    ├── index.md       ← 内容目录（每次 ingest 自动更新）
-    └── log.md         ← 操作日志（append-only）
+└── wiki/              ← Wiki 层（LLM 完全掌控）
+    ├── entities/
+    ├── concepts/
+    ├── sources/
+    ├── synthesis/
+    ├── .cache/        ← 文件转换缓存（自动管理）
+    ├── index.md
+    └── log.md
 ```
 
 **类比**：Obsidian = IDE，LLM = 程序员，Wiki = 代码库。你打开 Obsidian 实时浏览，LLM 在后台编辑维护。
@@ -65,14 +66,16 @@ your-wiki/
 
 运行 `/setup` 后，LLM 将引导你完成：
 
-1. ✅ 检测 Node.js 版本（需 >= 22）
-2. 📦 安装 qmd 搜索引擎（`npm install -g @tobilu/qmd`）
-3. 📝 输入知识库名称（如：`ux-research`）
-4. 📂 选择知识库位置（默认桌面，或自定义路径）
-5. 🏗️ 自动创建完整目录结构
-6. ⚙️ 生成 `Schema.md` Schema 文件
-7. 🔗 配置 qmd 集合（`qmd collection add`）
-8. 🎉 输出欢迎信息和使用指南
+1. ✅ 检测 Node.js（需 ≥ 22）+ Python（需 ≥ 3.10，可选）
+2. 🔧 编译 qmd 搜索引擎（从内嵌源码自动编译，无需手动安装）
+3. 🌐 配置 HuggingFace 镜像（中国大陆用户自动设置）
+4. 📝 输入知识库名称（如：`ux-research`）
+5. 📂 选择知识库位置（默认桌面，或自定义路径）
+6. 🏗️ 自动创建完整目录结构 + 生成 Schema.md
+7. 🔗 配置 qmd 搜索集合
+8. 📥 预下载 AI 搜索模型（向量语义搜索 + LLM 重排序，约 1.3GB，可选）
+9. 📦 安装文件转换依赖（支持 Excel/Word/PPT/PDF，可选）
+10. 🎉 输出欢迎信息和使用指南
 
 ---
 

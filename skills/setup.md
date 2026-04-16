@@ -131,7 +131,7 @@ pnpm --version
 npm install -g pnpm
 
 # 2.2 进入 qmd 目录安装依赖
-cd <skill安装路径>/scripts/qmd
+cd <SKILL_PATH>/scripts/qmd
 pnpm install --no-frozen-lockfile
 
 # 2.3 编译 TypeScript
@@ -141,7 +141,7 @@ npx tsc -p tsconfig.build.json
 node dist/cli/qmd.js --version
 ```
 
-> ⚠️ 注意：`<skill安装路径>` 是 `npx skills add` 安装 skill 到本地的路径。LLM 应自动检测此路径（通常在 `~/.skills/` 或 `.agents/skills/` 下）。
+> ⚠️ 注意：`<SKILL_PATH>` 是 `npx skills add` 安装 skill 到本地的路径。LLM 应自动检测此路径（通常在 `~/.skills/` 或 `.agents/skills/` 下）。
 
 **编译成功**：
 ```
@@ -170,13 +170,13 @@ npx tsc -p tsconfig.build.json
 
 ```bash
 # 直接用 node 调用编译后的入口
-node <skill安装路径>/scripts/qmd/dist/cli/qmd.js <命令> [参数]
+node <SKILL_PATH>/scripts/qmd/dist/cli/qmd.js <命令> [参数]
 
 # 例如：
-node <skill安装路径>/scripts/qmd/dist/cli/qmd.js query "用户痛点"
-node <skill安装路径>/scripts/qmd/dist/cli/qmd.js update
-node <skill安装路径>/scripts/qmd/dist/cli/qmd.js collection list
-node <skill安装路径>/scripts/qmd/dist/cli/qmd.js embed
+node <SKILL_PATH>/scripts/qmd/dist/cli/qmd.js query "用户痛点"
+node <SKILL_PATH>/scripts/qmd/dist/cli/qmd.js update
+node <SKILL_PATH>/scripts/qmd/dist/cli/qmd.js collection list
+node <SKILL_PATH>/scripts/qmd/dist/cli/qmd.js embed
 ```
 
 > 💡 LLM 应在 setup 完成后记住 qmd 的完整调用路径，后续 ingest/query 时直接使用。
@@ -215,7 +215,6 @@ qmd 的搜索功能分三个层级，模型在首次使用时自动下载到 ~/.
   - Qwen3-Reranker-0.6B（结果重排序，~600MB）
 
 模型会在首次使用对应功能时自动下载，无需手动操作。
-也可以用 `qmd pull` 命令预先下载所有模型。
 ```
 
 ---
@@ -812,9 +811,9 @@ kb-wiki 的所有工具（qmd、Obsidian 等）都是推荐但非必须的。你
 如果 qmd 已安装，执行：
 
 ```bash
-qmd collection add "{{WIKI_PATH}}/wiki" --name "{{WIKI_NAME}}"
-qmd collection list
-qmd update
+node <SKILL_PATH>/scripts/qmd/dist/cli/qmd.js collection add "{{WIKI_PATH}}/wiki" --name "{{WIKI_NAME}}"
+node <SKILL_PATH>/scripts/qmd/dist/cli/qmd.js collection list
+node <SKILL_PATH>/scripts/qmd/dist/cli/qmd.js update
 ```
 
 预期输出：
@@ -921,15 +920,14 @@ Documents
 
 ## 故障排除
 
-### qmd 安装失败
+### qmd 编译失败
+
+请重新执行步骤 2（编译 qmd），确保 `pnpm install` 和 TypeScript 编译成功：
 
 ```bash
-# 检查 npm 版本
-npm --version
-
-# 清理 npm 缓存后重试
-npm cache clean --force
-npm install -g @tobilu/qmd
+cd <SKILL_PATH>/scripts/qmd
+pnpm install --no-frozen-lockfile
+npx tsc -p tsconfig.build.json
 ```
 
 ### 目录已存在

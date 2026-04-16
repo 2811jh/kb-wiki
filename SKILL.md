@@ -28,6 +28,7 @@ your-wiki/
     ├── concepts/      ← 概念页面（痛点、行为模式、设计模式）
     ├── sources/       ← 资料摘要页面（每份原始资料对应一个）
     ├── synthesis/     ← 综合分析页面（对比分析、概览、洞察归档、跨资料结论）
+    ├── .cache/        ← 文件转换缓存（Excel/Word/PPT/PDF → Markdown，自动管理）
     ├── index.md       ← 内容目录（每次 ingest 自动更新）
     └── log.md         ← 操作日志（append-only，知识库演进的时间线）
 ```
@@ -57,98 +58,26 @@ your-wiki/
 
 ## 首次使用流程
 
-当用户首次运行 `/setup` 时，按以下步骤执行（详见 [setup.md](skills/setup.md)）：
+运行 `/setup` 后，LLM 将自动引导完成知识库初始化（详见 [setup.md](skills/setup.md)）：
 
-### 步骤 1：检测依赖
+1. **环境检测**：检测 Node.js (≥22)、Python (≥3.10，用于文件格式转换)
+2. **编译 qmd 搜索引擎**：从内嵌源码自动编译，配置 HuggingFace 镜像（中国大陆）
+3. **创建知识库**：收集名称和路径 → 创建目录结构 → 生成 Schema.md / index.md / log.md
+4. **配置搜索索引**：注册 qmd 集合 → 预下载 AI 模型（向量搜索 + LLM 重排序，约 1.3GB）
+5. **完成**：输出欢迎信息和使用指南
 
-```bash
-node --version   # 必须 >= 22
-qmd --version    # 检查 qmd 是否已安装
-```
+> 💡 Python 和 AI 模型下载均为**可选**。即使跳过，核心功能（.md 文件的 ingest/query/lint + BM25 关键词搜索）仍可正常使用。
 
-如果 Node.js 版本不满足，告知用户升级。如果 qmd 未安装，执行：
+### 支持的文件格式
 
-```bash
-npm install -g @tobilu/qmd
-```
-
-### 步骤 2：收集配置信息
-
-询问用户：
-1. **知识库名称**：建议使用英文小写，如 `ux-research`、`product-wiki`
-2. **知识库位置**：
-   - 默认：桌面（`~/Desktop/<知识库名称>`）
-   - 可选：自定义完整路径
-
-### 步骤 3：创建目录结构
-
-```bash
-mkdir -p <知识库路径>/raw/articles
-mkdir -p <知识库路径>/raw/papers
-mkdir -p <知识库路径>/raw/assets
-mkdir -p <知识库路径>/raw/data
-mkdir -p <知识库路径>/wiki/entities
-mkdir -p <知识库路径>/wiki/concepts
-mkdir -p <知识库路径>/wiki/sources
-mkdir -p <知识库路径>/wiki/synthesis
-```
-
-### 步骤 4：生成初始文件
-
-1. 将 `templates/Schema.md.template` 中 `{{WIKI_NAME}}` 替换为实际名称，复制为 `<知识库路径>/Schema.md`
-2. 创建 `<知识库路径>/wiki/index.md`（空目录文件）
-3. 创建 `<知识库路径>/wiki/log.md`（空日志文件）
-
-**index.md 初始内容**：
-
-```markdown
-# {{WIKI_NAME}} 知识库索引
-
-> 最后更新：{{当前日期}}
-> 总页面数：0
-
-## entities/（实体页面）
-
-*暂无内容，等待第一次 ingest*
-
-## concepts/（概念页面）
-
-*暂无内容，等待第一次 ingest*
-
-## sources/（资料摘要）
-
-*暂无内容，等待第一次 ingest*
-
-## synthesis/（综合分析）
-
-*暂无内容，等待第一次 ingest*
-```
-
-**log.md 初始内容**：
-
-```markdown
-# 操作日志
-
-> 格式：`## [YYYY-MM-DD] ingest/query/lint | 标题`
-> 此文件只允许追加，不允许删改历史记录。
-
-## [{{当前日期}}] setup | 知识库初始化完成
-```
-
-### 步骤 5：配置 qmd 集合
-
-```bash
-qmd collection add <知识库路径>/wiki --name <知识库名称>
-qmd update
-```
-
-### 步骤 6：输出欢迎信息
-
-告知用户：
-- 知识库位置
-- 如何开始：将资料放入 `raw/articles/`，然后运行 `/ingest`
-- 如何查询：运行 `/query 你的问题`
-- 建议用 Obsidian 打开知识库根目录，实时浏览 wiki
+| 格式 | 扩展名 | 处理方式 |
+|------|--------|---------|
+| Markdown / 文本 | `.md`, `.txt`, `.csv` | LLM 直接读取 |
+| Excel | `.xlsx`, `.xls` | 自动转换为 Markdown（需 Python） |
+| Word | `.docx` | 自动转换为 Markdown（需 Python） |
+| PowerPoint | `.pptx` | 自动转换为 Markdown（需 Python） |
+| PDF | `.pdf` | 自动转换为 Markdown（需 Python） |
+| 图片 | `.png`, `.jpg`, `.gif`, `.webp` | LLM 视觉能力直接查看 |
 
 ---
 

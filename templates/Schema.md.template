@@ -46,6 +46,7 @@
     │                         每份原始资料对应一个摘要页，不可替代原始资料
     ├── synthesis/         ← 综合分析页面
     │                         对比分析、概览、跨资料结论、洞察归档、行动建议
+    ├── .cache/            ← 文件转换缓存（Excel/Word/PPT/PDF → Markdown，自动管理，可删可重建）
     ├── index.md           ← 内容目录（每次 ingest 必须更新）
     └── log.md             ← 操作日志（append-only，知识库演进的时间线，帮助 LLM 理解近期动态）
 ```
