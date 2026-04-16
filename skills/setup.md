@@ -217,6 +217,8 @@ qmd 的搜索功能分三个层级，模型在首次使用时自动下载到 ~/.
 模型会在首次使用对应功能时自动下载，无需手动操作。
 ```
 
+> 💡 说明：`qmd embed`（步骤 9.5）会自动下载层级 2 所需的模型（~1.3GB）。层级 3 的重排序模型（~600MB）在首次执行 `qmd query` 时按需下载。
+
 ---
 
 ### 步骤 3：询问知识库名称
@@ -283,6 +285,7 @@ mkdir -p "{{WIKI_PATH}}/wiki/entities"
 mkdir -p "{{WIKI_PATH}}/wiki/concepts"
 mkdir -p "{{WIKI_PATH}}/wiki/sources"
 mkdir -p "{{WIKI_PATH}}/wiki/synthesis"
+mkdir -p "{{WIKI_PATH}}/wiki/.cache"
 ```
 
 Windows 等价命令：
@@ -296,6 +299,7 @@ New-Item -ItemType Directory -Force -Path "{{WIKI_PATH}}\wiki\entities"
 New-Item -ItemType Directory -Force -Path "{{WIKI_PATH}}\wiki\concepts"
 New-Item -ItemType Directory -Force -Path "{{WIKI_PATH}}\wiki\sources"
 New-Item -ItemType Directory -Force -Path "{{WIKI_PATH}}\wiki\synthesis"
+New-Item -ItemType Directory -Force -Path "{{WIKI_PATH}}\wiki\.cache"
 ```
 
 ---
@@ -398,7 +402,7 @@ New-Item -ItemType Directory -Force -Path "{{WIKI_PATH}}\wiki\synthesis"
 7. **检查矛盾**：对比新资料与现有 wiki 内容，用 `⚠️ 矛盾` 标注发现的冲突
 8. **更新综合结论**：在 `synthesis/` 相关页面中强化或修订已有结论
 9. **记录日志**：在 `wiki/log.md` 末尾追加记录（格式：`## [YYYY-MM-DD] ingest | 资料标题`）
-10. **重建索引**：运行 `qmd update` 重建 qmd 搜索索引
+10. **重建索引**：运行 `qmd update` 重建搜索索引，然后运行 `qmd embed` 更新向量嵌入
 
 **完成后汇报**：告知用户更新了哪些页面（新建/更新），发现了哪些矛盾，修订了哪些综合结论。
 
@@ -408,8 +412,8 @@ New-Item -ItemType Directory -Force -Path "{{WIKI_PATH}}\wiki\synthesis"
 
 当用户运行 `/query` 时，按以下步骤执行：
 
-1. **读取 index.md**：了解知识库全貌，定位相关页面
-2. **执行 qmd 搜索**：优先使用 `qmd query "问题"` 混合搜索
+1. **执行 qmd 搜索**：先运行 `qmd status` 确认索引状态，然后优先使用 `qmd query "问题"` 混合搜索（向量索引未就绪时回退到 `qmd search`）
+2. **读取 index.md**：补充搜索盲区，了解知识库全貌
 3. **读取相关页面**：通过 `qmd get` 或 `qmd multi-get` 读取搜索结果中的页面
 4. **生成综合答案**：基于多个页面的内容，综合生成答案（带引用，标注置信度）
 5. **标注矛盾**：如果不同来源有冲突，明确指出
@@ -914,6 +918,8 @@ Documents
 
 💡 推荐：安装 Obsidian（https://obsidian.md）并打开此知识库目录，
    你将能实时看到 LLM 构建的知识图谱。
+
+💡 支持导入多种格式：.md, .txt, .csv（直接读取），.xlsx, .docx, .pptx, .pdf（自动转换）
 ```
 
 ---

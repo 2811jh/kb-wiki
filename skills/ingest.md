@@ -9,6 +9,8 @@
 ```
 /ingest raw/articles/user-interview-2024-03.md
 /ingest raw/papers/ux-heuristics-nielsen.pdf
+/ingest raw/data/survey-results.xlsx
+/ingest raw/articles/竞品分析报告.docx
 /ingest（然后用户粘贴文本内容）
 ```
 

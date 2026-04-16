@@ -138,7 +138,7 @@ your-wiki/
 | Word | `.docx` | 自动转换为 Markdown | Python + python-docx |
 | PowerPoint | `.pptx` | 自动转换为 Markdown | Python + python-pptx |
 | PDF | `.pdf` | 自动转换为 Markdown | Python + PyMuPDF |
-| 图片 | `.png`, `.jpg`, `.gif` | LLM 视觉能力直接查看 | 无 |
+| 图片 | `.png`, `.jpg`, `.gif`, `.webp` | LLM 视觉能力直接查看 | 无 |
 
 > 📦 转换工具的 Python 依赖在 `/setup` 阶段自动安装。不需要转换的用户可以跳过。
 > 转换脚本位于 `scripts/convert/`，每种格式独立一个脚本，方便维护。
