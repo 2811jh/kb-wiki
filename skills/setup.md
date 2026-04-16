@@ -486,12 +486,34 @@ Wiki 页面文件名采用**中文描述 + 英文 slug** 的格式，便于在 O
 ```yaml
 ---
 title: 页面标题（与 H1 一致）
-date: YYYY-MM-DD（最后更新日期，每次修改时更新）
+slug: english-slug（英文标识符，用于文件名和交叉引用锚点）
+type: source | entity | concept | synthesis（页面类型）
+date: YYYY-MM-DD（创建日期）
+updated: YYYY-MM-DD（最后更新日期，每次修改时更新）
 tags: [标签1, 标签2, 标签3]
 sources: [sources/相关摘要1, sources/相关摘要2]
 related: [entities/实体页, concepts/概念页, synthesis/综合页]
+aliases: [别名1, 别名2]（可选，页面的其他称呼，便于搜索和引用）
+severity: high | medium | low（可选，仅痛点/问题类页面使用，标识严重程度）
+frequency: high | medium | low（可选，仅痛点/问题类页面使用，标识出现频率）
 ---
 ```
+
+**字段说明**：
+
+| 字段 | 必填 | 说明 |
+|------|------|------|
+| `title` | ✅ | 页面标题，与 H1 一致 |
+| `slug` | ✅ | 英文标识符，用于文件名中的英文部分（如 `search-pain-points`） |
+| `type` | ✅ | 页面类型：`source` / `entity` / `concept` / `synthesis` |
+| `date` | ✅ | 创建日期 |
+| `updated` | ✅ | 最后更新日期，每次修改时更新 |
+| `tags` | ✅ | 分类标签，便于 Dataview 查询 |
+| `sources` | ✅ | 引用的 sources/ 摘要页面列表 |
+| `related` | ✅ | 关联页面列表（跨目录交叉引用） |
+| `aliases` | 可选 | 页面的其他称呼（如"NPS"和"净推荐值"互为 alias），便于搜索命中 |
+| `severity` | 可选 | 仅用于痛点/问题类概念页，标识严重程度 |
+| `frequency` | 可选 | 仅用于痛点/问题类概念页，标识出现频率 |
 
 ### 交叉引用格式
 
@@ -528,10 +550,14 @@ related: [entities/实体页, concepts/概念页, synthesis/综合页]
 ```markdown
 ---
 title: 资料标题
+slug: source-english-slug
+type: source
 date: YYYY-MM-DD
+updated: YYYY-MM-DD
 tags: [资料类型, 主题标签]
 sources: [raw/articles/原始文件名.md]
 related: [entities/..., concepts/...]
+aliases: [资料简称]
 ---
 
 # 资料标题
@@ -557,10 +583,14 @@ related: [entities/..., concepts/...]
 ```markdown
 ---
 title: 实体名称
+slug: entity-english-slug
+type: entity
 date: YYYY-MM-DD
+updated: YYYY-MM-DD
 tags: [实体类型, 标签]
 sources: [sources/...]
 related: [concepts/...]
+aliases: [实体别名, 英文名]
 ---
 
 # 实体名称
@@ -580,10 +610,16 @@ related: [concepts/...]
 ```markdown
 ---
 title: 概念名称
+slug: concept-english-slug
+type: concept
 date: YYYY-MM-DD
+updated: YYYY-MM-DD
 tags: [概念类型, 标签]
 sources: [sources/...]
 related: [entities/..., concepts/..., synthesis/...]
+aliases: [概念别名]
+severity: high | medium | low（可选，仅痛点/问题类使用）
+frequency: high | medium | low（可选，仅痛点/问题类使用）
 ---
 
 # 概念名称
