@@ -1,0 +1,265 @@
+---
+description: AI coding guidance and rules for the kb-wiki repository.
+alwaysApply: true
+---
+
+<rule>
+
+# kb-wiki — AI Coding Rules
+
+## 1. Project Overview
+
+kb-wiki is an **LLM-driven persistent knowledge base management skill**. It instructs LLM agents (Claude Code, Claude Desktop, etc.) to build and maintain structured Wiki knowledge bases from raw research materials.
+
+**Primary languages**: Markdown (skill instructions + wiki content), TypeScript (qmd search engine), Python (file conversion scripts)
+**Architecture**: Three-layer wiki system — `raw/` (immutable sources) → `wiki/` (LLM-maintained knowledge) → `Schema.md` (LLM work specification)
+**Requires**: Node.js ≥22, Python ≥3.10 (optional, for file conversion)
+
+---
+
+## 2. File and Naming Conventions
+
+### 2.1 Wiki Page Files (Chinese + English Hybrid)
+
+**Format**: `中文描述英文slug.md` — Chinese description (4-8 chars) + English kebab-case slug, concatenated directly with NO separator.
+
+```
+✅ 服务器产品特征server-features.md
+✅ 基岩版玩家minecraft-bedrock.md
+✅ 支付体验分析payment-experience.md
+✅ 春节满意度调研spring-festival-survey.md
+❌ server-features.md          (missing Chinese)
+❌ 服务器产品特征.md              (missing English slug)
+❌ 服务器产品特征_server-features.md  (no separator allowed)
+```
+
+### 2.2 Python Files
+
+- File names: `convert_<format>.py` (snake_case)
+- Functions: `snake_case` — `parse_xlsx()`, `clean_markdown()`, `extract_images()`
+- Private functions: `_underscore_prefix` — `_derive_source_name()`
+- Constants: `UPPER_SNAKE_CASE` — `IMAGE_EXTENSIONS`
+- No classes — use **functional style** with module-level functions
+- Shebang: `#!/usr/bin/env python3`
+- Use `from __future__ import annotations` for PEP 604 union syntax
+
+### 2.3 TypeScript Files
+
+- Interfaces: `PascalCase` — `Database`, `Statement`, `Store`
+- Functions: `camelCase` — `openDatabase()`, `loadSqliteVec()`, `createStore()`
+- Constants: `UPPER_SNAKE_CASE` — `DEFAULT_EMBED_MODEL`, `CHUNK_SIZE_TOKENS`
+- Variables: `camelCase` — `_Database`, `_sqliteVecLoad`, `isBun`
+- Module system: ESM (`import`/`export`), use `.js` extensions in import paths
+- Use `import type` for type-only imports (`verbatimModuleSyntax: true`)
+
+### 2.4 Markdown Skill Files
+
+- Start with `# Title` + blockquote explaining purpose
+- Use structured sections with `---` horizontal rule dividers
+- Code blocks must have language tags: `bash`, `powershell`, `markdown`, `yaml`, `json`, `python`, `typescript`
+- Use emoji indicators consistently: ✅ ❌ ⚠️ 💡 🔴 🟡 🟢 📂 📝 🔍 📊 📥 🎉
+- Primary language: **Chinese**; English used only in code/slugs/technical terms
+
+---
+
+## 3. YAML Frontmatter Specification
+
+All wiki pages **must** include YAML frontmatter:
+
+```yaml
+---
+title: 页面标题（与 H1 一致）
+slug: english-slug
+type: source | entity | concept | synthesis
+date: YYYY-MM-DD
+updated: YYYY-MM-DD
+tags: [标签1, 标签2, 标签3]
+sources: [sources/相关摘要1, sources/相关摘要2]
+related: [entities/实体页, concepts/概念页, synthesis/综合页]
+aliases: [别名1, 别名2]           # optional
+severity: high | medium | low     # optional, pain-point pages only
+frequency: high | medium | low    # optional, pain-point pages only
+---
+```
+
+**Required fields**: `title`, `slug`, `type`, `date`, `updated`, `tags`, `sources`, `related`
+**Optional fields**: `aliases`, `severity`, `frequency`
+
+---
+
+## 4. Key Placeholders
+
+| Placeholder | Meaning | Example |
+|---|---|---|
+| `<SKILL_PATH>` | kb-wiki skill installation path | `~/.agents/skills/kb-wiki/` |
+| `{{WIKI_PATH}}` | User's wiki root directory | `~/Desktop/ux-research` |
+| `{{WIKI_NAME}}` | User's wiki name | `ux-research` |
+| `{{CURRENT_DATE}}` | Current date | `2026-04-16` |
+
+**Never hardcode paths** — always use these placeholders in skill instruction files.
+
+---
+
+## 5. qmd Invocation Pattern
+
+**Standard invocation** (always use full path, never bare `qmd`):
+
+```bash
+node <SKILL_PATH>/scripts/qmd/dist/cli/qmd.js <command> [arguments]
+```
+
+**Key behavior**:
+- `-c` is shorthand for `--collection`
+- `qmd update` and `qmd embed` do **not** support `--collection` — they process all registered collections
+- `qmd query` returns empty silently when vector index is missing — always check `qmd status` first
+
+---
+
+## 6. Python Convert Script Interface
+
+All four scripts (`convert_xlsx.py`, `convert_docx.py`, `convert_pptx.py`, `convert_pdf.py`) share a **unified CLI interface**:
+
+```bash
+python <SKILL_PATH>/scripts/convert/convert_<format>.py <input_file> <output_md> [--images-dir <dir>]
+```
+
+**Output contract**:
+- Exit code `0` = success, `1` = failure
+- JSON summary to stdout: `{"success": true, "file_type": "...", ...}`
+- Errors to stderr via `logging`
+- Individual item failures (e.g., one bad image) do **not** halt overall conversion
+
+**Image naming convention**: `{source_name}_p{page}_img{sequence}.{ext}` (PDF), `{source_name}_s{slide}_img{sequence}.{ext}` (PPTX), `{source_name}_img{sequence}.{ext}` (DOCX/XLSX). Strip bracket prefixes like `[UX][G79]` from source names.
+
+---
+
+## 7. Cross-Reference Format
+
+**Preferred**: Obsidian-style wiki links
+```markdown
+[[entities/用户-A]]    ← cross-directory (recommended)
+[[页面名]]              ← same-directory
+```
+
+**Special annotations** (use exactly these formats):
+```markdown
+> ⚠️ **矛盾**：[[sources/资料A]] 认为 X，但 [[sources/资料B]] 显示 Y。
+> 💡 **综合结论**：基于 N 份资料，[结论]。置信度：高/中/低
+> ❓ **待验证**：[论断] 目前仅有 1 份资料支撑。
+> 🔄 **已更新**：此结论已被 [[sources/新资料]] 取代。
+```
+
+---
+
+## 8. Workflow Constraints
+
+### 8.1 Ingest (10 steps)
+1. Detect format + read (or convert via Python scripts to `wiki/.cache/`)
+2. Discuss key points with user
+3. Write summary page in `wiki/sources/`
+4. Update `wiki/index.md`
+5. Update `wiki/entities/` pages
+6. Update `wiki/concepts/` pages
+7. Check contradictions (annotate with `⚠️ 矛盾`)
+8. Update `wiki/synthesis/` conclusions
+9. Append to `wiki/log.md` (format: `## [YYYY-MM-DD] ingest | title`)
+10. Run `qmd update` + `qmd embed`, check lint reminder (every 5 ingests)
+
+### 8.2 Query (search-first, 8 steps)
+> ❌ FORBIDDEN: Selecting files based on prior knowledge of index.md
+> ✅ REQUIRED: Always run qmd search first, let the search engine rank results
+
+1. Check `qmd status` → use `qmd query` (hybrid) if vectors exist, else `qmd search` (BM25)
+2. Read `index.md` (supplementary only)
+3. Read candidate files from search results
+4. Generate answer with citations and confidence levels
+5-8. Format, archive offer, log
+
+### 8.3 Immutability Rules
+- `raw/` directory: **absolutely read-only** — never modify
+- `wiki/log.md`: **append-only** — never edit or delete history
+- `wiki/` directory: LLM has full control — can create, modify, reorganize
+
+---
+
+## 9. Error Handling Patterns
+
+### Python Scripts
+```python
+# Pattern 1: Graceful import failure
+try:
+    import openpyxl
+except ImportError:
+    openpyxl = None  # check at runtime
+
+# Pattern 2: JSON error reporting
+try:
+    result = parse(...)
+    print(json.dumps({"success": True, ...}))
+    return 0
+except Exception as exc:
+    logger.error("Failed: %s", exc, exc_info=True)
+    print(json.dumps({"success": False, "error": str(exc)}))
+    return 1
+
+# Pattern 3: Per-item silent failure
+for item in items:
+    try:
+        process(item)
+    except Exception as exc:
+        logger.warning("Skipping %s: %s", item, exc)
+```
+
+### TypeScript
+```typescript
+// Cross-runtime try/catch with fallback
+try {
+    const { getLoadablePath } = await import("sqlite-vec");
+    _sqliteVecLoad = (db: any) => db.loadExtension(vecPath);
+} catch {
+    _sqliteVecLoad = null;  // degrade gracefully
+}
+```
+
+---
+
+## 10. Development Commands
+
+### Build qmd
+```bash
+cd <SKILL_PATH>/scripts/qmd
+pnpm install --no-frozen-lockfile
+npx tsc -p tsconfig.build.json
+node dist/cli/qmd.js --version  # verify
+```
+
+### Install Python Dependencies
+```bash
+pip install -r <SKILL_PATH>/scripts/convert/requirements.txt
+python -c "import docx, openpyxl, pptx, fitz; print('OK')"  # verify
+```
+
+### Test Convert Scripts
+```bash
+python scripts/convert/convert_xlsx.py input.xlsx output.md --images-dir ./assets
+# Check: exit code 0 + JSON stdout + output.md created
+```
+
+### Run qmd Tests
+```bash
+cd scripts/qmd && pnpm test  # vitest
+```
+
+---
+
+## 11. Critical Reminders
+
+1. **All skill instruction files use Chinese as primary language** — generate Chinese content for wiki pages, log entries, user-facing messages
+2. **Never use `npm install -g @tobilu/qmd`** — qmd is embedded as source code in `scripts/qmd/`, invoked via `node <SKILL_PATH>/scripts/qmd/dist/cli/qmd.js`
+3. **Never use `qmd pull`** — this command does not exist. Models download automatically during `qmd embed`
+4. **`qmd embed` has no progress output** — this is expected behavior, document it when relevant
+5. **PDF conversion must remove CJK inter-character spaces** — apply regex `([\u4e00-\u9fff])\s+([\u4e00-\u9fff])` → `\1\2` multiple times
+6. **Setup step numbering is 1-13** — sequential integers, no decimals
+7. **Schema.md template lives inline in `skills/setup.md`** — there is no separate `templates/` directory
+
+</rule>
