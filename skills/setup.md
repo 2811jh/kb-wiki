@@ -396,7 +396,7 @@ New-Item -ItemType Directory -Force -Path "{{WIKI_PATH}}\wiki\.cache"
 1. **读取资料**：读取 `raw/` 中的原始文件，或用户提供的文本内容
 2. **理解要点**：提取关键发现、重要引述、涉及的用户/产品/概念
 3. **写摘要页面**：在 `wiki/sources/` 创建摘要页面（格式见下方第 8 节）
-4. **更新 index.md**：在对应分类下添加新页面条目（格式：`[[页面名]] - 摘要 | 来源数`）
+4. **更新 index.md**：在对应分类下添加新页面条目（格式：`- 页面名 – 摘要`，**纯文本，禁止 `[[]]`**）
 5. **更新 entities/**：更新或创建本次资料涉及的实体页面（用户、产品、组织等）
 6. **更新 concepts/**：更新或创建本次资料涉及的概念页面（痛点、行为模式等）
 7. **检查矛盾**：对比新资料与现有 wiki 内容，用 `⚠️ 矛盾` 标注发现的冲突
@@ -641,42 +641,47 @@ frequency: high | medium | low（可选，仅痛点/问题类使用）
 
 ## 9. index.md 格式规范
 
+> ⚠️ **关键规则：index.md 禁止使用 `[[wiki-link]]`，必须使用纯文本。**
+> 原因：index.md 链接到所有页面，会在 Obsidian 图谱中形成巨大的星形中心节点，掩盖页面之间真正有意义的关联。
+
 ```markdown
 # {{WIKI_NAME}} 知识库索引
 
-> 最后更新：YYYY-MM-DD
-> 总页面数：N | sources: x | entities: x | concepts: x | synthesis: x
+> 最后更新：YYYY-MM-DD | 页面总数：N（sources: x | entities: x | concepts: x | synthesis: x）
+>
+> ℹ️ 本页使用纯文本列表（非 wiki-link），避免在 Obsidian 图谱中产生干扰性的星形连线。
 
 ---
 
 ## sources/（资料摘要）
 
-[[资料名-1]] - 一行摘要描述 `| 1`
-[[资料名-2]] - 一行摘要描述 `| 1`
+- 资料名-1 – 一行摘要描述
+- 资料名-2 – 一行摘要描述
 
 ---
 
 ## entities/（实体页面）
 
-[[实体名-1]] - 一行描述 `| 来源数`
+- 实体名-1 – 一行描述
+- 实体名-2 – 一行描述
 
 ---
 
 ## concepts/（概念页面）
 
-[[概念名-1]] - 一行描述 `| 来源数`
+- 概念名-1 – 一行描述
 
 ---
 
 ## synthesis/（综合分析）
 
-[[分析名-1]] - 一行描述 `| 来源数`
+- 分析名-1 – 一行描述
 ```
 
 **规则**：
 - 每次 ingest 后必须更新 index.md
-- 每行格式：`[[页面名]] - 一行摘要 \`| 来源数\``
-- 来源数 = 该页面引用的 sources/ 摘要数量
+- 每行格式：`- 页面名 – 一行摘要`（**纯文本，禁止 `[[]]`**）
+- 使用 `–`（en-dash）分隔页面名和摘要，便于阅读
 - 查询时先读 index.md 定位相关页面
 
 ---
@@ -799,8 +804,9 @@ kb-wiki 的所有工具（qmd、Obsidian 等）都是推荐但非必须的。你
 ```markdown
 # {{WIKI_NAME}} 知识库索引
 
-> 最后更新：{{CURRENT_DATE}}
-> 总页面数：0 | sources: 0 | entities: 0 | concepts: 0 | synthesis: 0
+> 最后更新：{{CURRENT_DATE}} | 页面总数：0（sources: 0 | entities: 0 | concepts: 0 | synthesis: 0）
+>
+> ℹ️ 本页使用纯文本列表（非 wiki-link），避免在 Obsidian 图谱中产生干扰性的星形连线。
 
 ---
 

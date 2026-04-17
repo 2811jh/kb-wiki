@@ -175,26 +175,28 @@ related: [entities/用户-A, entities/用户-B, concepts/支付流程, concepts/
 
 ### 步骤 4：更新 wiki/index.md
 
-在 `index.md` 中添加新页面的条目：
+在 `index.md` 中添加新页面的条目。
+
+> ⚠️ **index.md 禁止使用 `[[wiki-link]]`**，必须使用纯文本列表。
+> 原因：`[[]]` 会让 index.md 成为 Obsidian 图谱的星形中心，掩盖页面间真正的关联。
 
 **格式规范**（每行）：
 ```
-[[页面名]] - 一行摘要 `| 来源数`
+- 页面名 – 一行摘要
 ```
 
 **示例**：
 ```markdown
 ## sources/（资料摘要）
 
-[[用户访谈-2024-03]] - 2位用户对支付流程和加载速度的反馈 `| 1`
-[[用户访谈-2024-01]] - 首次深度访谈，发现导航痛点 `| 1`
-[[竞品分析-2024-02]] - 3个竞品支付流程对比分析 `| 1`
+- 用户访谈2024-03user-interview-2024-03 – 2位用户对支付流程和加载速度的反馈
+- 用户访谈2024-01user-interview-2024-01 – 首次深度访谈，发现导航痛点
+- 竞品分析2024-02competitor-analysis-2024-02 – 3个竞品支付流程对比分析
 ```
 
 同时更新页面统计数字：
 ```
-> 最后更新：{{CURRENT_DATE}}
-> 总页面数：12 | sources: 3 | entities: 5 | concepts: 4 | synthesis: 0
+> 最后更新：{{CURRENT_DATE}} | 页面总数：12（sources: 3 | entities: 5 | concepts: 4 | synthesis: 0）
 ```
 
 ---
