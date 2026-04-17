@@ -24,28 +24,111 @@
 
 ## 2. Obsidian Web Clipper
 
-**用途**：将网页文章一键转换为 Markdown，快速收入 `raw/articles/`。
+**用途**：在浏览器中看到有价值的文章时，一键剪藏为 Markdown 文件，直接保存到知识库的 `raw/articles/` 目录。
 
-### 安装
+### 2.1 安装
 
-1. 在浏览器扩展商店搜索 "Obsidian Web Clipper" 并安装
-2. 配置 Vault 路径指向知识库根目录
+| 浏览器 | 安装链接 |
+|--------|---------|
+| Chrome / Edge | [Chrome Web Store](https://chromewebstore.google.com/detail/obsidian-web-clipper/cnjifjpddelmedmihgijeibhnjfabmlf) |
+| Firefox | [Firefox Add-ons](https://addons.mozilla.org/en-US/firefox/addon/web-clipper-obsidian/) |
+| Safari | Obsidian 桌面端内置，需在 设置 → 通用 → Web Clipper 中开启 |
 
-### 使用工作流
+安装后在浏览器工具栏会出现 Obsidian 图标。
 
-1. 在浏览器中打开要保存的文章
-2. 点击 Web Clipper 图标
-3. 选择保存路径为 `raw/articles/`
-4. 点击保存
-5. 回到 LLM 对话，执行 `/ingest raw/articles/刚保存的文件.md`
+### 2.2 连接到知识库
 
-### 图片本地化
+1. 打开 Obsidian，确保已打开知识库根目录（包含 `Schema.md` 的那个文件夹）
+2. 点击浏览器中的 Web Clipper 图标
+3. 首次使用会提示连接 Vault → 选择你的知识库
+4. 连接成功后，图标会变为实心
 
-剪藏文章后，图片默认是远程 URL。为防止链接失效：
+### 2.3 配置剪藏模板（关键步骤）
+
+在 Web Clipper 设置中创建一个 **kb-wiki 专用模板**，确保剪藏的文章自带结构化元数据：
+
+**设置路径**：点击 Web Clipper 图标 → 右下角齿轮 ⚙️ → Templates → New template
+
+**模板名称**：`kb-wiki`
+
+**保存路径（Folder）**：
+
+```
+raw/articles
+```
+
+**文件名（File name）**：
+
+```
+{{title}}
+```
+
+**模板内容（Template）**：
+
+````
+---
+title: "{{title}}"
+date: {{date}}
+source_url: "{{url}}"
+author: "{{author|default:未知}}"
+domain: "{{domain}}"
+tags: [待分类]
+clipped: true
+---
+
+# {{title}}
+
+> 🔗 来源：[{{domain}}]({{url}})
+> 📅 剪藏时间：{{date}}
+
+{{content}}
+````
+
+> 💡 **`clipped: true` 标记很重要**：LLM 在 ingest 时会识别此标记，自动将文章作为"网络文章"类型处理，并在 sources/ 摘要页中记录原始 URL。
+
+### 2.4 日常使用流程
+
+```
+① 浏览器中看到有价值的文章
+      ↓
+② 点击 Web Clipper 图标 → 选择 "kb-wiki" 模板 → 保存
+      ↓
+③ 文件自动保存到 raw/articles/文章标题.md
+      ↓
+④ 下次打开 LLM 对话时，LLM 会自动检测到新文件并提醒：
+   "📎 发现 raw/articles/ 中有 2 篇新资料尚未导入，要我处理吗？"
+      ↓
+⑤ 确认后 LLM 自动批量 ingest → 知识库更新完成
+```
+
+> 你也可以随时主动说："帮我处理刚剪藏的文章"或 `/ingest raw/articles/文章标题.md`
+
+### 2.5 图片本地化（推荐）
+
+剪藏的文章中，图片默认是远程 URL。为防止链接失效，建议剪藏后立即本地化：
 
 1. 在 Obsidian 设置 → 快捷键中，搜索 "Download"
-2. 找到 "Download attachments for current file"，绑定快捷键（推荐 `Ctrl+Shift+D`）
-3. 打开刚剪藏的文件，按快捷键，所有图片自动下载到 `raw/assets/`
+2. 找到 **"Download attachments for current file"**，绑定快捷键（推荐 `Ctrl+Shift+D`）
+3. 打开刚剪藏的文件，按快捷键 → 所有图片自动下载到 `raw/assets/`
+
+> ⚠️ 如果不做图片本地化，原始 URL 可能在几个月后失效，导致图片丢失。
+
+### 2.6 常见问题
+
+**Q：剪藏后文件保存在哪了？**
+A：如果模板配置正确，文件在 `知识库根目录/raw/articles/` 下。如果找不到，检查 Web Clipper 模板的 Folder 设置。
+
+**Q：剪藏的内容格式很乱怎么办？**
+A：Web Clipper 对部分网站的解析可能不完美。可以选择"简化文章"模式（Clipper 界面中的选项），或剪藏后在 Obsidian 中手动整理再 ingest。LLM 能处理格式不完美的 Markdown。
+
+**Q：我一天剪藏了很多篇，怎么批量导入？**
+A：下次打开 LLM 对话时会自动检测并提醒批量导入。也可以主动说"把 raw/articles/ 里的新文章都导入"。
+
+**Q：剪藏的文章需要我自己分类吗？**
+A：不需要！LLM 在 ingest 时会自动分析内容，创建对应的 entities/、concepts/ 页面，并归类到合适的主题下。你只需要剪藏，分类由 LLM 完成。
+
+**Q：能剪藏需要登录才能看的文章吗？**
+A：可以。Web Clipper 剪藏的是你当前浏览器中**已渲染**的页面内容，所以只要你能看到，就能剪藏。
 
 > 💡 LLM 无法在一次 read_file 中读取内嵌图片。工作流是：LLM 先读文本内容，再单独查看 raw/assets/ 中的图片获取额外上下文。
 

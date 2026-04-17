@@ -449,7 +449,7 @@ New-Item -ItemType Directory -Force -Path "{{WIKI_PATH}}\wiki\.cache"
 ```
 ---
 💡 **知识库健康提醒**：你已经导入了 5 份新资料（自上次健康检查以来）。
-建议运行 `/lint` 检查知识库健康状态（矛盾、孤立页面、缺失引用等）。
+你可以对我说"对知识库进行健康检查"，我会帮你检测矛盾、孤立页面、缺失引用等问题。
 ---
 ```
 
@@ -993,9 +993,14 @@ Documents
 
 支持的格式：.md .txt .csv .xlsx .docx .pptx .pdf .png .jpg 等
 
+📎 推荐安装 Obsidian Web Clipper 浏览器插件：
+  浏览网页时一键剪藏文章到 raw/articles/，下次对话我会自动检测并提醒导入。
+  Chrome：https://chromewebstore.google.com/detail/obsidian-web-clipper/cnjifjpddelmedmihgijeibhnjfabmlf
+  Firefox：https://addons.mozilla.org/en-US/firefox/addon/web-clipper-obsidian/
+
 🎯 你还可以做这些事：
   · 查询知识库：直接问我问题，如"性能痛点的根因是什么？"、"女性玩家核心需求是什么？"
-  · 健康检查：运行 /lint 检查知识库一致性
+  · 健康检查：对我说"对知识库进行健康检查"
   · 用 Obsidian 浏览：打开 {{WIKI_PATH}} 查看完整知识图谱
 ```
 
