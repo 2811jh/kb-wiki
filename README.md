@@ -1,52 +1,37 @@
 # kb-wiki
 
-[![npm version](https://img.shields.io/npm/v/kb-wiki.svg)](https://www.npmjs.com/package/kb-wiki)
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![node](https://img.shields.io/badge/node-%3E%3D22-brightgreen.svg)](https://nodejs.org)
-[![skills](https://img.shields.io/badge/skills-agentskills.io-purple.svg)](https://agentskills.io)
 
-**LLM 自动维护的持久化研究知识库 skill —— 你只负责提供资料和提问，LLM 负责构建整个知识库。**
+**LLM 自动维护的持久化研究知识库 —— 你只负责提供资料和提问，LLM 负责构建整个 Wiki。**
+
+> 基于 [llm-wiki](https://github.com/2811jh/kb-wiki) 理念 · 搭配 Obsidian 实时浏览 · 支持 Excel / Word / PPT / PDF
 
 ---
 
-## 快速安装
+## 安装
+
+### 方式一：Skills CLI（推荐）
 
 ```bash
-# 方式一：通过 skills CLI 安装（推荐）
 npx skills add 2811jh/kb-wiki
+```
 
-# 方式二：手动安装（如果 skills CLI 不可用）
+### 方式二：手动安装
+
+```bash
 git clone https://github.com/2811jh/kb-wiki.git ~/.agents/skills/kb-wiki
+```
 
-# 安装完成后，在 Claude 中初始化知识库
+### 安装后初始化
+
+在 Claude / CodeMaker 对话中输入：
+
+```
 /setup
 ```
 
----
-
-## 核心理念：llm-wiki 三层架构
-
-kb-wiki 基于 [llm-wiki](https://github.com/2811jh/kb-wiki) 理念构建，将知识库分为三层：
-
-```
-your-wiki/
-├── Schema.md          ← Schema 层：告诉 LLM 如何工作（可自定义演进）
-├── raw/               ← 原始资料层：只读，LLM 从这里读取来源
-│   ├── articles/      ← 文章、访谈记录
-│   ├── papers/        ← 学术论文
-│   ├── assets/        ← 图片等媒体文件
-│   └── data/          ← 数据文件
-└── wiki/              ← Wiki 层（LLM 完全掌控）
-    ├── entities/
-    ├── concepts/
-    ├── sources/
-    ├── synthesis/
-    ├── .cache/        ← 文件转换缓存（自动管理）
-    ├── index.md
-    └── log.md
-```
-
-**类比**：Obsidian = IDE，LLM = 程序员，Wiki = 代码库。你打开 Obsidian 实时浏览，LLM 在后台编辑维护。
+LLM 会自动引导你完成全部配置（环境检测 → 编译搜索引擎 → 创建知识库 → 下载 AI 模型）。
 
 ---
 
@@ -55,64 +40,54 @@ your-wiki/
 | 命令 | 功能 | 说明 |
 |------|------|------|
 | `/setup` | 初始化知识库 | 创建目录结构、配置 qmd、生成 Schema.md |
-| `/ingest <文件或内容>` | 导入新资料 | 自动更新 10-15 个 wiki 页面 |
+| `/ingest <文件>` | 导入新资料 | 自动更新 10-15 个 wiki 页面 |
 | `/query <问题>` | 查询知识库 | 混合搜索 + 综合答案 + 可选归档 |
-| `/lint` | 健康检查 | 检测矛盾、孤立页面、缺失引用等 7 项 |
-| `/status` | 查看状态 | 显示知识库统计和 qmd 索引状态 |
+| `/lint` | 健康检查 | 矛盾、孤立页面、缺失引用等 7 项检查 |
+| `/status` | 查看状态 | 知识库统计 + qmd 索引状态 |
+
+> 💡 也可以直接用自然语言，如"帮我导入这份报告"、"用户最大的痛点是什么？"
 
 ---
 
-## 工作流示意图
+## 三层架构
 
 ```
-┌─────────────────────────────────────────────────────────────────────┐
-│                        kb-wiki 工作流全景                            │
-└─────────────────────────────────────────────────────────────────────┘
-
-  首次使用                    日常使用（循环）
-  ───────                    ──────────────
-
-  ┌──────────┐         ┌──────────────────────────────────────────┐
-  │  /setup   │         │                                          │
-  │  初始化   │         │   ① 用户放入资料         ② 用户提问      │
-  │  知识库   │         │      ↓                      ↓           │
-  └────┬─────┘         │  ┌────────┐            ┌─────────┐      │
-       │               │  │/ingest │            │ /query  │      │
-       ▼               │  │导入资料│            │查询知识 │      │
-  创建目录结构          │  └───┬────┘            └────┬────┘      │
-  编译 qmd             │      │                      │           │
-  生成 Schema.md       │      ▼                      ▼           │
-  下载 AI 模型         │  ┌─────────────┐    ┌──────────────┐    │
-       │               │  │ LLM 自动执行 │    │ qmd 混合搜索  │    │
-       ▼               │  │             │    │ BM25 + 向量   │    │
-  ✅ 知识库就绪         │  │ · 创建摘要页 │    │ + LLM 重排序  │    │
-                       │  │ · 更新实体页 │    └──────┬───────┘    │
-                       │  │ · 更新概念页 │           │           │
-                       │  │ · 标注矛盾   │           ▼           │
-                       │  │ · 强化交叉引用│    ┌──────────────┐    │
-                       │  │ · 修订综合结论│    │ LLM 综合答案  │    │
-                       │  │ · 更新索引   │    │（带引用+置信度）│    │
-                       │  └───┬─────────┘    └──────┬───────┘    │
-                       │      │                      │           │
-                       │      ▼                      ▼           │
-                       │   wiki/ 持续增长      可选归档到         │
-                       │   知识复利 📈         synthesis/        │
-                       │                                          │
-                       └──────────────────────────────────────────┘
-                                      │
-                              每 5 次 ingest
-                                      │
-                                      ▼
-                               ┌────────────┐
-                               │   /lint     │
-                               │  健康检查   │
-                               │             │
-                               │ · 矛盾检测  │
-                               │ · 孤立页面  │
-                               │ · 缺失引用  │
-                               │ · 数据空白  │
-                               └────────────┘
+your-wiki/
+├── Schema.md        ← 规范层：告诉 LLM 如何工作（可自定义演进）
+├── raw/             ← 原始资料层（只读）
+│   ├── articles/       文章、访谈记录
+│   ├── papers/         学术论文、研究报告
+│   ├── assets/         图片等媒体文件
+│   └── data/           数据文件（CSV、JSON）
+└── wiki/            ← Wiki 层（LLM 完全掌控）
+    ├── entities/       实体（用户、产品、组织）
+    ├── concepts/       概念（痛点、行为模式）
+    ├── sources/        资料摘要（每份资料一个）
+    ├── synthesis/      综合分析（跨资料洞察）
+    ├── index.md        内容目录
+    └── log.md          操作日志（append-only）
 ```
+
+**类比**：Obsidian = IDE，LLM = 程序员，Wiki = 代码库。
+
+---
+
+## 支持的文件格式
+
+| 格式 | 扩展名 | 处理方式 |
+|------|--------|---------|
+| Markdown / 文本 | `.md` `.txt` `.csv` | 直接读取 |
+| Excel | `.xlsx` `.xls` | 自动转 Markdown（需 Python） |
+| Word | `.docx` | 自动转 Markdown（需 Python） |
+| PowerPoint | `.pptx` | 自动转 Markdown（需 Python） |
+| PDF | `.pdf` | 自动转 Markdown（需 Python） |
+| 图片 | `.png` `.jpg` `.gif` `.webp` | LLM 视觉能力直接查看 |
+
+> Python 为可选依赖（仅转换非文本文件时需要），`/setup` 时自动安装。
+
+---
+
+## 工作流
 
 ```
 用户做的事（很少）              LLM 做的事（很多）
@@ -123,119 +98,31 @@ your-wiki/
                               📊 定期健康检查 → 发现知识空白
 ```
 
----
-
-## 首次使用：/setup 流程
-
-运行 `/setup` 后，LLM 将引导你完成：
-
-1. ✅ 检测 Node.js（需 ≥ 22）+ Python（需 ≥ 3.10，可选）
-2. 🔧 编译 qmd 搜索引擎（从内嵌源码自动编译，无需手动安装）
-3. 🌐 配置 HuggingFace 镜像（中国大陆用户自动设置）
-4. 📝 输入知识库名称（如：`ux-research`）
-5. 📂 选择知识库位置（默认桌面，或自定义路径）
-6. 🏗️ 自动创建完整目录结构 + 生成 Schema.md
-7. 🔗 配置 qmd 搜索集合
-8. 📥 预下载 AI 搜索模型（向量语义搜索 + LLM 重排序，约 1.3GB，可选）
-9. 📦 安装文件转换依赖（支持 Excel/Word/PPT/PDF，可选）
-10. 🎉 输出欢迎信息和使用指南
-
----
-
-## 核心工作流示例
-
-### 导入资料（Ingest）
+### /ingest 示例
 
 ```
-# 将文章放入 raw/articles/，然后告诉 LLM：
 /ingest raw/articles/user-interview-2024-03.md
-
-# LLM 会自动：
-# ✓ 读取并理解资料
-# ✓ 在 wiki/sources/ 创建摘要页面
-# ✓ 更新 wiki/entities/ 中相关用户页面
-# ✓ 更新 wiki/concepts/ 中相关概念页面
-# ✓ 检查并标注与现有内容的矛盾
-# ✓ 强化或修订 wiki/synthesis/ 中的综合结论
-# ✓ 更新 wiki/index.md
-# ✓ 在 wiki/log.md 追加记录
-# ✓ 运行 qmd update 重建索引
 ```
 
-### 查询知识库（Query）
+LLM 会自动：创建摘要页 → 更新实体页 → 更新概念页 → 标注矛盾 → 修订综合结论 → 更新索引 → 重建搜索
+
+### /query 示例
 
 ```
 /query 我们的用户在支付流程中最大的痛点是什么？
-
-# LLM 会：
-# ✓ 用 qmd 搜索相关页面
-# ✓ 综合多个来源给出答案（带引用）
-# ✓ 询问是否将洞察归档到 synthesis/
 ```
 
-### 健康检查（Lint）
+LLM 会：qmd 混合搜索 → 综合多来源 → 带引用的答案 → 可选归档到 synthesis/
+
+### /lint 示例
 
 ```
 /lint
-
-# LLM 输出报告，包含：
-# ✓ 矛盾论断（如：A 说用户不在意价格，B 说价格是首要因素）
-# ✓ 孤立页面（没有入站链接的页面）
-# ✓ 缺失交叉引用
-# ✓ 过时论断
-# ✓ 数据空白建议
-# ✓ 推荐探索方向
 ```
 
-> 💡 每导入 5 份资料后，LLM 会自动提醒你运行 `/lint`。
+输出：矛盾论断 · 孤立页面 · 缺失引用 · 过时内容 · 数据空白 · 建议行动
 
----
-
-## 支持的文件格式
-
-| 格式 | 扩展名 | 处理方式 | 依赖 |
-|------|--------|---------|------|
-| Markdown | `.md`, `.txt` | 直接读取 | 无 |
-| CSV | `.csv` | 直接读取 | 无 |
-| Excel | `.xlsx`, `.xls` | 自动转换为 Markdown | Python + openpyxl |
-| Word | `.docx` | 自动转换为 Markdown | Python + python-docx |
-| PowerPoint | `.pptx` | 自动转换为 Markdown | Python + python-pptx |
-| PDF | `.pdf` | 自动转换为 Markdown | Python + PyMuPDF |
-| 图片 | `.png`, `.jpg`, `.gif`, `.webp` | LLM 视觉能力直接查看 | 无 |
-
-> 📦 转换工具的 Python 依赖在 `/setup` 阶段自动安装。不需要转换的用户可以跳过。
-> 转换脚本位于 `scripts/convert/`，每种格式独立一个脚本，方便维护。
-
----
-
-## 推荐工具链
-
-| 工具 | 用途 | 安装 |
-|------|------|------|
-| **Obsidian** | 实时浏览 wiki，图谱视图可视化页面关联结构 | [obsidian.md](https://obsidian.md) |
-| **Obsidian Web Clipper** | 浏览器文章一键转 Markdown | [Chrome](https://chromewebstore.google.com/detail/obsidian-web-clipper/cnjifjpddelmedmihgijeibhnjfabmlf) / [Firefox](https://addons.mozilla.org/en-US/firefox/addon/web-clipper-obsidian/) |
-| **qmd** | 本地 Markdown 搜索引擎（BM25 + 向量），完整源码内嵌在 `scripts/qmd/` | `/setup` 时自动编译 |
-| **Marp** | 将 wiki 页面转为幻灯片 | Obsidian 插件：[Marp Slides](https://obsidian.md/plugins?id=marp-slides) |
-| **Dataview** | Obsidian 中查询 wiki 数据 | Obsidian 插件：[Dataview](https://obsidian.md/plugins?id=dataview) |
-| **git** | 知识库版本控制 | [git-scm.com](https://git-scm.com/downloads)，然后 `git init` 在知识库根目录 |
-
-### Obsidian 配置建议
-
-#### 附件文件夹设置
-
-在 Obsidian 中打开 **设置 → 文件与链接**，将"附件文件夹路径"设为 `raw/assets`。这样所有通过 Web Clipper 剪藏或粘贴保存的图片会自动存入 `raw/assets/` 目录。
-
-#### 本地下载图片
-
-在 **设置 → 快捷键** 中，搜索 "Download"，找到 "Download attachments for current file"，绑定快捷键（推荐 `Ctrl+Shift+D`）。剪藏文章后按快捷键，所有远程图片会下载到本地 `raw/assets/` 目录，避免 URL 失效。
-
-#### 关于 LLM 与图片
-
-LLM 无法在一次操作中读取含有内联图片的 Markdown 文件。解决方法：让 LLM 先读取文本内容，然后单独查看部分或全部引用的图片以获取额外上下文。虽然略显笨拙，但效果足够好。
-
-#### 图谱视图
-
-打开 Obsidian 的 **图谱视图（Graph View）**，可以可视化浏览 wiki 中所有页面之间的链接关系——哪些页面是枢纽节点、哪些页面相互关联、哪些页面是孤立的。这是观察知识库形状最直观的方式。
+> 每导入 5 份资料后，LLM 会自动提醒运行 `/lint`。
 
 ---
 
@@ -243,71 +130,64 @@ LLM 无法在一次操作中读取含有内联图片的 Markdown 文件。解决
 
 | | 传统 RAG | kb-wiki |
 |---|---|---|
-| 知识形式 | 原始文档向量索引 | LLM 提炼的结构化 Wiki |
+| 知识形式 | 文档向量索引 | LLM 提炼的结构化 Wiki |
 | 矛盾处理 | 原样返回冲突内容 | 标注并综合矛盾 |
 | 知识增长 | 线性堆积 | 复利式增长（交叉引用强化） |
 | 可读性 | 机器友好 | 人类可直接阅读 |
-| 维护者 | 人类 | LLM |
-| 查询质量 | 依赖相似度 | 依赖语义理解 + 知识综合 |
 | 输入格式 | 纯文本/PDF | Markdown, Excel, Word, PPT, PDF, 图片 |
 
 ---
 
-## 为什么有效
+## 推荐工具
 
-维护知识库最繁琐的部分不是阅读和思考——而是**簿记工作**：更新交叉引用、保持摘要最新、标注新数据与旧结论的矛盾、在数十个页面间维护一致性。
+| 工具 | 用途 | 链接 |
+|------|------|------|
+| **Obsidian** | 实时浏览 wiki + 图谱视图 | [obsidian.md](https://obsidian.md) |
+| **Web Clipper** | 浏览器文章一键剪藏 | [Chrome](https://chromewebstore.google.com/detail/obsidian-web-clipper/cnjifjpddelmedmihgijeibhnjfabmlf) / [Firefox](https://addons.mozilla.org/en-US/firefox/addon/web-clipper-obsidian/) |
+| **Marp** | wiki 页面转幻灯片 | [Obsidian 插件](https://obsidian.md/plugins?id=marp-slides) |
+| **Dataview** | frontmatter 动态查询 | [Obsidian 插件](https://obsidian.md/plugins?id=dataview) |
+| **git** | 知识库版本控制 | [git-scm.com](https://git-scm.com/downloads) |
 
-**人类会放弃 wiki，因为维护负担的增长速度快于知识价值的增长速度。**
-
-LLM 改变了这个等式：
-- 🤖 **不会厌倦**：更新第 100 个交叉引用和第 1 个一样准确
-- 🤖 **不会遗忘**：不会忘记更新某个角落里的引用
-- 🤖 **一次触及 15 个文件**：单次 ingest 自动更新 10-15 个 wiki 页面
-
-**Wiki 之所以能持续保持维护状态，是因为维护成本趋近于零。**
-
-**分工**：
-- 🧑 **人类的工作**：策划来源、引导分析方向、提出正确的问题、思考信息的意义
-- 🤖 **LLM 的工作**：其他一切
+> qmd 搜索引擎（BM25 + 向量 + LLM 重排序）已内嵌在 skill 中，`/setup` 时自动编译，无需单独安装。
 
 ---
 
 ## 进阶用法
 
-### git 版本控制
+### Git 版本控制
 
 ```bash
-cd ~/Desktop/ux-research  # 你的知识库根目录
-git init
-echo "raw/assets/*.mp4" >> .gitignore  # 忽略大文件
-git add .
-git commit -m "feat: 初始化知识库"
+cd ~/Desktop/your-wiki
+git init && git add . && git commit -m "init: 知识库创建"
 ```
 
-### qmd MCP 模式（给 Claude Desktop）
+### qmd MCP 模式
 
-在 Claude Desktop 配置文件中添加：
+在 Claude Desktop 配置中添加：
 
 ```json
 {
   "mcpServers": {
     "kb-wiki": {
       "command": "qmd",
-      "args": ["mcp"],
-      "env": {}
+      "args": ["mcp"]
     }
   }
 }
 ```
 
-### 多人协作
+---
 
-```bash
-# 共享知识库（推荐方案）
-# 1. 将知识库推送到私有 git 仓库
-# 2. 团队成员 clone 后各自配置 qmd 集合
-# 3. 通过 PR/merge 合并各自的 ingest 内容
-```
+## 为什么有效
+
+维护知识库最繁琐的不是思考——而是**簿记**：更新交叉引用、保持摘要最新、标注矛盾、在数十个页面间维护一致性。
+
+**人类会放弃 wiki，因为维护负担的增长速度快于知识价值的增长速度。**
+
+LLM 改变了这个等式——维护成本趋近于零，知识持续复利增长。
+
+- 🧑 **人类**：策划来源、引导分析、提出正确的问题
+- 🤖 **LLM**：其他一切
 
 ---
 
