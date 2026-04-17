@@ -465,28 +465,27 @@ grep "^## \[" wiki/log.md | tail -20
 
 ### 文件命名规范
 
-Wiki 页面文件名采用**中文描述 + 英文 slug** 的格式，便于在 Obsidian 关系图谱中直观识别：
+Wiki 页面文件名采用**纯中文**，便于在 Obsidian 关系图谱中直观识别：
 
-**格式**：`中文名称英文slug.md`
+**格式**：`中文名称.md`
 
 **示例**：
-- `服务器产品特征server-features.md`（概念页）
-- `基岩版玩家minecraft-bedrock.md`（实体页）
-- `支付体验分析payment-experience.md`（综合分析页）
-- `汕头服务器内测访谈shantou-server-beta-week1.md`（资料摘要页）
+- `服务器产品特征.md`（概念页）
+- `基岩版玩家.md`（实体页）
+- `支付体验分析.md`（综合分析页）
+- `汕头服务器内测访谈.md`（资料摘要页）
 
 **规则**：
-1. 中文部分：简短描述（4-8个字），代表页面的核心主题
-2. 英文部分：小写 kebab-case，与中文描述对应的英文标识符
-3. 两部分直接拼接，无分隔符
-4. 英文部分同时作为 qmd 搜索和交叉引用的锚点
+1. 简短描述（4-10 个字），代表页面的核心主题
+2. 不附加英文 slug，纯中文即可
+3. 避免特殊字符（`/ \ : * ? " < > |`），确保跨平台兼容
 
 ### 所有 wiki 页面必须包含 YAML frontmatter
 
 ```yaml
 ---
 title: 页面标题（与 H1 一致）
-slug: english-slug（英文标识符，用于文件名和交叉引用锚点）
+slug: english-slug（英文标识符，用于 qmd 搜索和程序化引用，不影响文件名）
 type: source | entity | concept | synthesis（页面类型）
 date: YYYY-MM-DD（创建日期）
 updated: YYYY-MM-DD（最后更新日期，每次修改时更新）

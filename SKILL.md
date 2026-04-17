@@ -104,7 +104,7 @@ grep "^## \[" wiki/log.md | tail -20 | grep "ingest" | wc -l
 
 ## 重要原则
 
-> **文件命名**：wiki 页面采用"中文描述 + 英文 slug"格式，如 `服务器产品特征server-features.md`，便于 Obsidian 图谱中直观识别。
+> **文件命名**：wiki 页面采用**纯中文**文件名，如 `回流玩家群体.md`、`支付流程痛点.md`，便于 Obsidian 图谱中直观识别。
 
 ### LLM 的职责
 
