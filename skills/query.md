@@ -35,32 +35,70 @@
 node <SKILL_PATH>/scripts/qmd/dist/cli/qmd.js status
 ```
 
-查看 `status` 输出中 `Vectors` 一行：
-- `Vectors: N embedded`（N > 0）→ 使用混合搜索 `qmd query`
-- `Vectors: 0 embedded` → 使用 BM25 搜索 `qmd search`（向量索引未就绪）
+查看 `status` 输出中 `Vectors` 一行，按结果执行对应流程：
 
-**有向量索引时——执行混合搜索**（BM25 + 向量语义 + LLM 重排序）：
+---
+
+#### 情况 A：`Vectors: 0 embedded`（向量未就绪）→ 自动修复
+
+> 🚫 **禁止跳过！不要降级到纯 BM25 搜索。** 必须先建好向量再查询。
+
+**立即执行以下两步**：
+
+```bash
+# 1. 确保 BM25 索引最新
+node <SKILL_PATH>/scripts/qmd/dist/cli/qmd.js update
+
+# 2. 自动生成向量嵌入（首次约 1-2 分钟，需下载 ~1.3GB 模型）
+node <SKILL_PATH>/scripts/qmd/dist/cli/qmd.js embed
+```
+
+> ⚠️ `qmd embed` 运行时**没有进度条输出**，这是正常行为，耐心等待即可。
+> 首次运行会自动下载 AI 模型，中国大陆用户需确保已配置 `HF_ENDPOINT=https://hf-mirror.com`。
+
+完成后重新检查状态：
+```bash
+node <SKILL_PATH>/scripts/qmd/dist/cli/qmd.js status
+```
+
+确认 `Vectors: N embedded`（N > 0）后，进入混合搜索。
+
+---
+
+#### 情况 B：`Vectors: N embedded`（N > 0）→ 执行混合搜索
+
+**使用三阶段混合搜索**（BM25 + 向量语义 + LLM 重排序）：
 
 ```bash
 node <SKILL_PATH>/scripts/qmd/dist/cli/qmd.js query "{{用户的查询关键词}}" -c {{WIKI_NAME}} -n 10
 ```
 
-> ⚠️ **注意**：`qmd query` 在向量索引未就绪时会**静默返回空**（无任何输出或报错），这是 qmd 当前版本的特性。如果运行后无输出，请先检查 `qmd status` 确认向量索引状态。
+> ⚠️ **注意**：`qmd query` 在向量索引未就绪时会**静默返回空**（无任何输出或报错）。如果运行后无输出，请重新检查 `qmd status`。
 
-**无向量索引时——使用 BM25 关键词搜索**：
+**如果 `qmd query` 结果不够丰富**，补充一次 BM25 搜索捕获关键词精确匹配：
 
 ```bash
 node <SKILL_PATH>/scripts/qmd/dist/cli/qmd.js search "{{关键词1}} {{关键词2}}" -c {{WIKI_NAME}} -n 10
 ```
 
-若 BM25 搜索也无结果，尝试调整关键词（中英文均试）或扩宽搜索词范围。
+---
 
-**如果向量索引未就绪**，告知用户：
+#### 情况 C：`qmd embed` 失败（网络/内存问题）→ 降级搜索
+
+仅在 embed 确实无法完成时（如网络不通、内存不足），才允许降级：
+
+```bash
+node <SKILL_PATH>/scripts/qmd/dist/cli/qmd.js search "{{关键词1}} {{关键词2}}" -c {{WIKI_NAME}} -n 10
 ```
-⚠️ 向量索引未就绪，本次使用 BM25 关键词搜索（仍可找到相关内容，但语义匹配能力较弱）。
-如需完整语义搜索，请运行：
-  node <SKILL_PATH>/scripts/qmd/dist/cli/qmd.js embed
+
+同时告知用户：
 ```
+⚠️ 向量索引建立失败（原因：[具体错误]），本次降级为 BM25 关键词搜索。
+搜索质量受限：语义相关但关键词不匹配的内容可能遗漏。
+建议排查后运行：node <SKILL_PATH>/scripts/qmd/dist/cli/qmd.js embed
+```
+
+---
 
 **搜索结果即为候选文件列表**，按相关性得分排序。取 top 5~10 进入下一步。
 
