@@ -11,14 +11,21 @@
 
 ## 快速安装
 
+**方式一**：通过 Skills CLI 安装（推荐）
+
 ```bash
-# 方式一：通过 skills CLI 安装（推荐）
 npx skills add 2811jh/kb-wiki
+```
 
-# 方式二：手动安装（如果 skills CLI 不可用）
+**方式二**：手动安装（如果 Skills CLI 不可用）
+
+```bash
 git clone https://github.com/2811jh/kb-wiki.git ~/.agents/skills/kb-wiki
+```
 
-# 安装完成后，在 Claude 中初始化知识库
+安装完成后，在对话中输入以下命令初始化知识库：
+
+```
 /setup
 ```
 
