@@ -901,44 +901,71 @@ node <SKILL_PATH>/scripts/qmd/dist/cli/qmd.js update
 
 ### 步骤 12：预下载 AI 搜索模型
 
-> **LLM 行为**：直接执行下载，不需要询问用户是否跳过。
-> 但呈现给用户时语气自然，像"最后一步，下载一下搜索模型就好了"这样，不要出现"强制""必须""不可跳过"等措辞。
+> 🚫 **此步骤为强制步骤，不可跳过、不可延迟到 `/query` 时再做。**
+> 没有完成此步骤的知识库视为**未创建完成**，不允许输出欢迎信息（步骤 13）。
+>
+> 原因：如果此步骤被跳过，后续 `/query` 只能使用 BM25 关键词搜索，
+> 向量语义搜索和 LLM 重排序都无法启用，搜索质量严重下降。
 
 **告知用户**：
 
 ```
-📥 最后一步：下载 AI 搜索模型（约 1.3GB，只需一次）。
-   下载完成后知识库就可以使用完整的语义搜索了，稍等一下 ⏳
+📥 正在预下载 AI 搜索模型（共约 2GB，只需下载一次）：
+   - embeddinggemma-300M    向量嵌入模型（~300MB）
+   - qmd-query-expansion    查询扩展模型（~1GB）
+   - Qwen3-Reranker-0.6B   结果重排序模型（~600MB）
+
+模型保存到：~/.cache/qmd/models/
+下载完成后，/query 将自动使用混合搜索（质量最高）。
 ```
 
-**执行下载**：
+**执行模型预下载**：
+
+qmd 的 AI 模型在**首次运行 `qmd embed` 时自动下载**（无需单独的 pull 命令）。
 
 ```bash
-# 触发模型下载 + 对初始 wiki 目录生成向量嵌入
+# 触发模型下载 + 对初始 wiki 目录（index.md + log.md）生成向量嵌入
+# ⚠️ 首次运行会下载约 1.3GB 模型，时间较长，请耐心等待
 node <SKILL_PATH>/scripts/qmd/dist/cli/qmd.js embed
 ```
 
-> ⚠️ `qmd embed` 运行时**没有进度条输出**，这是正常现象。
-> 首次下载可能需要几分钟（取决于网速），期间请勿中断。
+> ⚠️ **注意**：`qmd embed` 运行时**没有进度条输出**，这是 qmd 当前版本的特性。
+> 模型下载可能需要 5-30 分钟（取决于网速），期间命令会静默等待，这是**正常现象**，请勿中断。
 
-**验证**：
+验证模型是否下载并嵌入成功：
 
 ```bash
 node <SKILL_PATH>/scripts/qmd/dist/cli/qmd.js status
 ```
 
-- `Vectors: N embedded`（N > 0）→ ✅ 完成，告知用户"搜索模型已就绪"
-- `Vectors: 0 embedded` → 重试一次 embed，仍失败则进入失败处理
+在 `status` 输出中检查 `Vectors` 一行：
+- `Vectors: N embedded`（N > 0）→ ✅ 嵌入成功，向量搜索可用
+- `Vectors: 0 embedded` → ⚠️ 嵌入未完成，可能模型还在下载中，稍后重试
 
-**如果下载失败**（网络/超时）：
+**成功标志**（status 输出示例）：
 
 ```
-⚠️ 模型下载暂时没成功（可能是网络原因），不影响知识库的其他功能。
-   当前搜索用的是关键词匹配模式，后续联网后可以随时补装语义搜索：
-   node <SKILL_PATH>/scripts/qmd/dist/cli/qmd.js embed
+Documents
+  Total:    2 files indexed
+  Vectors:  2 embedded    ← 这里应该 > 0
+  Pending:  0 need embedding
 ```
 
-仍然继续进入步骤 13，知识库可正常使用。
+**如果 embed 因网络问题失败**（仅此情况允许暂缓）：
+
+```
+🔴 向量索引建立失败（原因：[具体错误信息]）。
+知识库创建【未完成】，搜索功能受限：
+  - /ingest：✅ 可用
+  - /lint：✅ 可用
+  - /query（BM25 关键词搜索）：⚠️ 降级可用（仅关键词匹配，语义搜索不可用）
+  - /query（向量语义搜索 + LLM 重排序）：❌ 不可用
+
+⚠️ 请尽快解决网络问题后运行以下命令完成初始化：
+  node <SKILL_PATH>/scripts/qmd/dist/cli/qmd.js embed
+```
+
+> 🚫 **注意**：用户主动说"跳过"时，LLM 应解释跳过的后果（搜索质量严重下降），并建议用户稍后补完。不允许 LLM 自行决定跳过。
 
 ---
 
