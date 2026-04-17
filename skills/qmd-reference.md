@@ -496,3 +496,103 @@ qmd collection add "C:/Users/name/Desktop/ux-research/wiki" --name ux-research
 # 或
 qmd collection add "C:\\Users\\name\\Desktop\\ux-research\\wiki" --name ux-research
 ```
+
+---
+
+## 常见问题排查
+
+### 问题 1：`qmd query` 返回空结果
+
+**症状**：执行 `qmd query "关键词"` 后无任何输出。
+
+**排查步骤**：
+1. 运行 `qmd status` 检查向量索引状态
+2. 如果 `Vectors: 0 embedded`，说明向量索引未建立
+3. 解决：执行 `node <SKILL_PATH>/scripts/qmd/dist/cli/qmd.js embed`
+4. 如果已有向量但仍无结果，尝试用 `qmd search`（BM25）代替
+
+> ⚠️ `qmd query` 在向量索引未就绪时会**静默返回空**，不报错。这是当前版本的已知行为。
+
+### 问题 2：`qmd search` 找不到中文内容
+
+**症状**：搜索中文关键词无结果，但文件确实存在。
+
+**排查步骤**：
+1. 确认已执行 `qmd update` 更新 BM25 索引
+2. 尝试缩短搜索词（如用 "支付" 代替 "支付流程优化"）
+3. 尝试英文关键词（部分页面可能包含英文 slug 或术语）
+4. 检查集合是否正确注册：`qmd status`
+
+### 问题 3：`qmd embed` 执行卡住或非常慢
+
+**症状**：embed 命令运行超过 10 分钟无进展。
+
+**排查步骤**：
+1. 首次 embed 需要下载 AI 模型（约 1.3GB），检查网络连接
+2. 中国大陆用户检查 HuggingFace 镜像是否已配置：
+   ```bash
+   echo %HF_ENDPOINT%    # Windows
+   echo $HF_ENDPOINT     # Mac/Linux
+   ```
+   应为 `https://hf-mirror.com`
+3. 如果模型已下载但仍然慢：大量页面首次 embed 需要时间，100 页约 1-2 分钟
+4. 如果内存不足（<8GB RAM），可能需要关闭其他应用
+
+### 问题 4：编译 qmd 时 TypeScript 报错
+
+**症状**：`npx tsc` 报类型错误。
+
+**排查步骤**：
+1. 确认 Node.js 版本 ≥ 22：`node --version`
+2. 确认已执行 `npm install`（在 qmd 源码目录下）
+3. 常见错误 `Database.transaction` 缺失 → 检查 `db.ts` 接口定义
+4. 如果持续报错，尝试清理后重新编译：
+   ```bash
+   rm -rf node_modules dist
+   npm install
+   npx tsc
+   ```
+
+### 问题 5：HuggingFace 模型下载超时
+
+**症状**：embed 或首次 query 时下载模型失败。
+
+**解决**：
+```bash
+# Windows
+set HF_ENDPOINT=https://hf-mirror.com
+
+# Mac/Linux
+export HF_ENDPOINT=https://hf-mirror.com
+```
+
+然后重试。如果镜像也不可用，可手动下载模型文件放到缓存目录（通常在 `~/.cache/huggingface/`）。
+
+---
+
+## 性能参考
+
+以下为典型笔记本电脑（16GB RAM, SSD）上的 qmd 性能参考值：
+
+| 操作 | 页面规模 | 预期耗时 | 说明 |
+|------|---------|---------|------|
+| `qmd search` (BM25) | 100 页 | < 100ms | 关键词匹配，极快 |
+| `qmd search` (BM25) | 500 页 | < 200ms | 仍然很快 |
+| `qmd query` (混合搜索) | 100 页 | 2-5 秒 | 包含向量检索 + LLM 重排序 |
+| `qmd query` (混合搜索) | 500 页 | 5-10 秒 | 重排序是主要耗时 |
+| `qmd update` (BM25 索引) | 100 页 | < 5 秒 | 全量重建 |
+| `qmd embed` (首次全量) | 100 页 | 1-2 分钟 | 含向量计算 |
+| `qmd embed` (增量) | 5 页新增 | < 15 秒 | 只处理变更页面 |
+| AI 模型首次下载 | — | 3-15 分钟 | 约 1.3GB，视网速 |
+
+> 💡 **关键优化**：每次 ingest 后执行 `qmd update` + `qmd embed`（增量），保持索引最新。增量 embed 非常快，不会成为瓶颈。
+
+**内存占用参考**：
+- BM25 搜索：< 100MB
+- 向量搜索 + 重排序：约 500MB-1GB（加载 AI 模型时）
+- 模型加载后常驻内存，后续查询复用
+
+**磁盘占用参考**：
+- AI 模型缓存：约 1.3GB（在 `~/.cache/` 下）
+- BM25 索引：约为 wiki 文件总大小的 20%
+- 向量索引：约为 wiki 文件总大小的 50%

@@ -38,6 +38,12 @@ your-wiki/
 - **wiki/**：知识的提炼产物，LLM 负责构建和维护所有交叉引用、矛盾标注、综合结论
 - **Schema.md**：规范层，让 LLM 成为训练有素的 Wiki 维护者而非通用聊天机器人，随使用逐步演进
 
+**sources/ vs synthesis/ 的区别**：
+- **sources/**：对**单一**原始资料的忠实摘要。一份资料对应一个 sources/ 页面。内容紧贴原文，是"这份资料说了什么"。
+- **synthesis/**：跨**多个**来源的原创分析。是 LLM（或用户引导下的 LLM）综合多份资料后提炼出的洞察、对比、结论。内容是"综合来看意味着什么"。
+
+> 类比：sources/ 是原材料，synthesis/ 是成品。sources/ 是笔记，synthesis/ 是论文。
+
 ---
 
 ## 意图识别 & 命令路由
@@ -118,7 +124,7 @@ grep "^## \[" wiki/log.md | tail -20 | grep "ingest" | wc -l
 ### 知识质量原则
 
 7. **综合结论要反映所有来源**：`synthesis/` 页面应综合所有相关资料，不偏向单一来源
-8. **好的 query 结果值得归档**：有价值的分析结论应保存到 `synthesis/`，避免重复工作
+8. **探索即积累，查询也是复利**：好的 query 分析结论应归档到 `synthesis/`，让每次探索都像导入新资料一样在知识库中持续积累。对比分析、发现的关联、综合洞察——这些不应消失在聊天记录中，而是成为知识库永久的一部分。
 9. **index.md 是导航核心**：查询时先读 index.md 定位相关页面，ingest 后必须更新 index.md
 10. **Lint 是知识库的定期体检**：不要等到问题积累太多才做健康检查
 
@@ -137,6 +143,7 @@ grep "^## \[" wiki/log.md | tail -20 | grep "ingest" | wc -l
 | [query.md](skills/query.md) | 查询知识库详细工作流 |
 | [lint.md](skills/lint.md) | 健康检查详细流程（7 项检查） |
 | [qmd-reference.md](skills/qmd-reference.md) | qmd 工具完整命令参考 |
+| [obsidian-tips.md](skills/obsidian-tips.md) | Obsidian 集成指南（Web Clipper、图谱视图、Dataview、Marp、Git） |
 
 ---
 

@@ -993,3 +993,80 @@ Windows 用户注意：
 - 使用 PowerShell 而非 CMD
 - 路径分隔符使用 `\` 或 `/` 均可
 - 桌面路径通常为 `C:\Users\<用户名>\Desktop\{{WIKI_NAME}}`
+
+---
+
+## 13. Schema 演进指南
+
+> Schema.md 不是一成不变的。随着知识库的使用，用户应该与 LLM 协作演进它，使其越来越贴合自己的领域和工作方式。
+
+### 何时演进 Schema
+
+| 信号 | 建议调整 |
+|------|---------|
+| 发现现有 4 种页面类型不够用 | 新增自定义类型（如 `decisions/`、`experiments/`） |
+| Frontmatter 字段不满足 Dataview 查询需求 | 添加新的元数据字段（如 `priority`、`status`） |
+| Ingest 流程中某步骤对当前领域不适用 | 在 Schema.md 中标注跳过该步骤 |
+| 同一类问题反复出现 | 在 Schema.md 中添加领域特定的处理规则 |
+| 知识库超过 100 页 | 考虑细分子目录（如 entities/ 下按类型分组） |
+
+### 演进示例
+
+#### 示例 1：新增自定义页面类型
+
+假设用户在做产品决策记录，需要 `decisions/` 类型：
+
+1. 在 `wiki/` 下创建 `decisions/` 目录
+2. 在 Schema.md 中添加：
+   ```markdown
+   ### decisions/（决策记录）
+   记录关键的产品/技术决策及其上下文和影响。
+   ```
+3. 定义 frontmatter 模板：
+   ```yaml
+   type: decision
+   status: proposed | accepted | deprecated
+   impact: high | medium | low
+   ```
+4. 更新 `index.md` 中添加 `decisions/` 分类
+
+#### 示例 2：添加新的 Frontmatter 字段
+
+为所有页面添加 `confidence` 字段表示结论可信度：
+
+```yaml
+confidence: high | medium | low | unverified
+```
+
+然后用 Dataview 查询低可信度页面：
+
+````markdown
+```dataview
+LIST
+FROM "wiki"
+WHERE confidence = "low" OR confidence = "unverified"
+```
+````
+
+#### 示例 3：领域特定规则
+
+如果知识库是"游戏用户研究"方向，可在 Schema.md 中添加：
+
+```markdown
+## 领域特定规则
+
+### 满意度调研处理
+- 满意度分数必须标注样本量和置信区间
+- NPS 分数按照行业标准分类：推荐者(9-10)、被动者(7-8)、贬损者(0-6)
+- 不同时期的调研结果必须标注调研时间，便于趋势对比
+
+### 用户访谈处理
+- 访谈对象必须记录：游戏时长、服务器、付费等级
+- 直接引述原文时使用 `>` 引用格式
+```
+
+### 演进频率建议
+
+- **每 10 次 ingest 后**：回顾 Schema.md，看是否有需要调整的规范
+- **每次 lint 后**：根据发现的模式问题，考虑是否需要新增规则
+- **切换研究主题时**：评估现有分类是否仍然适用
