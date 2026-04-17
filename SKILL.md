@@ -125,7 +125,7 @@ grep "^## \[" wiki/log.md | tail -20 | grep "ingest" | wc -l
 
 7. **综合结论要反映所有来源**：`synthesis/` 页面应综合所有相关资料，不偏向单一来源
 8. **探索即积累，查询也是复利**：好的 query 分析结论应归档到 `synthesis/`，让每次探索都像导入新资料一样在知识库中持续积累。对比分析、发现的关联、综合洞察——这些不应消失在聊天记录中，而是成为知识库永久的一部分。
-9. **index.md 是导航核心**：查询时先读 index.md 定位相关页面，ingest 后必须更新 index.md
+9. **index.md 是导航补充**：ingest 后必须更新 index.md；查询时以 qmd 搜索为主，index.md 仅用于补全搜索盲区
 10. **Lint 是知识库的定期体检**：不要等到问题积累太多才做健康检查
 
 ### Schema 演进原则
@@ -158,7 +158,7 @@ grep "^## \[" wiki/log.md | tail -20 | grep "ingest" | wc -l
 5. 三层架构：Raw sources + Wiki 层 + Schema 层（Schema.md）
 6. 三种操作：Ingest、Query、Lint
 7. 两个特殊文件：index.md（内容目录）+ log.md（append-only 操作日志）
-8. 可选 CLI 工具：qmd（本地搜索引擎，CLI + MCP 双模式）
+8. 核心搜索工具：qmd（本地搜索引擎，BM25 + 向量 + LLM 重排序，CLI + MCP 双模式）
 9. 技巧：Obsidian Web Clipper、本地图片、图谱视图、Marp、Dataview、git
 10. 为什么有效：繁重的维护工作由 LLM 完成，人类负责策划来源和引导分析
 11. 目录结构、Schema 约定等取决于用户领域，通过 Schema.md 自定义演进

@@ -146,14 +146,17 @@ cat "{{WIKI_PATH}}/Schema.md"
 
 ```markdown
 ---
-title: 用户访谈 - 2024年3月
+title: 访谈-2024年3月用户访谈
+slug: interview-2024-03
+type: source
 date: 2024-03-15
+updated: 2024-03-15
 tags: [用户访谈, 支付流程, 移动端]
 sources: [raw/articles/user-interview-2024-03.md]
-related: [entities/用户-A, entities/用户-B, concepts/支付流程, concepts/加载速度]
+related: [entities/用户-A, entities/用户-B, concepts/痛点-支付流程, concepts/痛点-加载速度]
 ---
 
-# 用户访谈 - 2024年3月
+# 访谈-2024年3月用户访谈
 
 ## 来源信息
 - **原始文件**：`raw/articles/user-interview-2024-03.md`
@@ -207,9 +210,9 @@ related: [entities/用户-A, entities/用户-B, concepts/支付流程, concepts/
 ```markdown
 ## sources/（资料摘要）
 
-- 用户访谈2024年3月 – 2位用户对支付流程和加载速度的反馈
-- 用户访谈2024年1月 – 首次深度访谈，发现导航痛点
-- 竞品分析2024年2月 – 3个竞品支付流程对比分析
+- 访谈-2024年3月用户访谈 – 2位用户对支付流程和加载速度的反馈
+- 访谈-2024年1月用户访谈 – 首次深度访谈，发现导航痛点
+- 竞品-2024年2月竞品分析 – 3个竞品支付流程对比分析
 ```
 
 同时更新页面统计数字：
@@ -225,7 +228,7 @@ related: [entities/用户-A, entities/用户-B, concepts/支付流程, concepts/
 
 **典型需要更新的实体类型**：
 - 用户人物（如：`wiki/entities/用户-A.md`）
-- 产品功能（如：`wiki/entities/快捷支付功能.md`）
+- 产品功能（如：`wiki/entities/产品-快捷支付.md`）
 - 竞品（如：`wiki/entities/竞品-微信支付.md`）
 
 **实体页面格式规范**：
@@ -267,9 +270,9 @@ related: [concepts/支付流程, concepts/加载速度]
 遍历本次资料中涉及的概念（痛点、行为模式、设计模式），逐一更新或创建页面。
 
 **典型需要更新的概念类型**：
-- 用户痛点（如：`wiki/concepts/支付流程痛点.md`）
-- 行为模式（如：`wiki/concepts/重复点击行为.md`）
-- 设计概念（如：`wiki/concepts/快捷支付.md`）
+- 用户痛点（如：`wiki/concepts/痛点-支付流程.md`）
+- 行为模式（如：`wiki/concepts/行为-重复点击.md`）
+- 设计概念（如：`wiki/concepts/需求-快捷支付.md`）
 
 **概念页面格式规范**：
 
@@ -397,8 +400,7 @@ node <SKILL_PATH>/scripts/qmd/dist/cli/qmd.js embed
 ```
 
 > 💡 **说明**：`qmd embed` 只会处理自上次 embed 后新增/变更的页面（增量更新），不会重复处理已有页面，速度很快。
-> AI 模型已在 `/setup` 步骤 9.5 中预下载，此处直接使用，无需等待。
-> 如果 `/setup` 时跳过了模型下载，首次 `embed` 会触发自动下载（约 1.3GB），耗时较长。
+> AI 模型已在 `/setup` 步骤 12 中预下载完成，此处直接使用，无需等待。
 
 **统计 ingest 次数，判断是否触发 Lint 提醒**：
 
