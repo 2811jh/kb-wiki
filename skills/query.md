@@ -322,11 +322,14 @@ plt.show()
 ```markdown
 ---
 title: 洞察-支付流程痛点
+slug: payment-pain-insight
+type: synthesis
 date: 2024-03-20
+updated: 2024-03-20
 tags: [支付, 痛点, 用户研究, 竞品]
 sources: [sources/访谈-2024年3月用户访谈, sources/访谈-2024年1月用户访谈, sources/竞品-2024年2月竞品分析]
 related: [concepts/痛点-支付流程, concepts/痛点-加载速度, entities/用户-A, entities/用户-B]
-query: 我们的用户在支付流程中最大的痛点是什么？
+query: "我们的用户在支付流程中最大的痛点是什么？"
 ---
 
 # 洞察-支付流程痛点
@@ -344,6 +347,18 @@ query: 我们的用户在支付流程中最大的痛点是什么？
 - 洞察-支付流程痛点 – 基于3份资料的支付体验综合分析
 ```
 
+并对被引用页面执行**反向强化链接**：
+- 在相关 `concepts/` 页面中补充“被哪些 synthesis 页面引用/扩展分析”
+- 在相关 `entities/` 页面中补充“出现于哪些综合分析”
+- 如原有结论被本次 query 修正，应同步更新对应页面的结论段落与 `updated` 字段
+
+归档完成后，必须立即刷新 qmd 索引，确保新洞察可被后续查询命中：
+
+```bash
+node <SKILL_PATH>/scripts/qmd/dist/cli/qmd.js update
+node <SKILL_PATH>/scripts/qmd/dist/cli/qmd.js embed
+```
+
 ---
 
 ### 步骤 8：在 log.md 追加记录（仅归档时）
@@ -355,13 +370,16 @@ query: 我们的用户在支付流程中最大的痛点是什么？
 
 - 查询问题：我们的用户在支付流程中最大的痛点是什么？
 - 搜索方式：qmd query（混合搜索）
-- 涉及页面：sources/用户访谈-2024-03、sources/用户访谈-2024-01、sources/竞品分析-2024-02
+- 涉及页面：sources/访谈-2024年3月用户访谈、sources/访谈-2024年1月用户访谈、sources/竞品-2024年2月竞品分析
 - 归档到：synthesis/洞察-支付流程痛点.md
+- 索引刷新：已执行 qmd update + qmd embed
 ```
 
 **注**：如果用户选择不归档，不记录到 log.md（避免日志膨胀）。
 
 > 💡 **探索的复利效应**：通过归档机制，用户的每一次探索性提问都会像导入新资料一样，在知识库中不断积累复利——对比分析、发现的关联、分析结论，这些有价值的洞察不会消失在聊天记录中，而是成为知识库永久的一部分。
+>
+> ⚠️ **归档完成不等于流程完成**：只有在 `synthesis/` 页面写入完成、相关页面反向链接已强化、且 `qmd update + qmd embed` 已执行后，本次沉淀才算真正完成。
 
 ---
 
