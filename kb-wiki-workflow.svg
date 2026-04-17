@@ -1,0 +1,386 @@
+
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1580" width="1200" height="1580" font-family="'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif">
+  <style>
+    :root {
+      --bg: #faf8f5;
+      --ink: #2d2926;
+      --ink-light: #706b66;
+      --sand: #f5e6d0;
+      --mint: #d4edda;
+      --sky: #d6eaf8;
+      --coral: #fadbd8;
+      --amber: #fdebd0;
+      --purple: #e8daef;
+      --border: #b0a99f;
+      --primary: #e67e22;
+      --secondary: #7f8c8d;
+      --feedback: #8e44ad;
+    }
+    .title { font-size: 28px; font-weight: 700; fill: var(--ink); }
+    .subtitle { font-size: 16px; fill: var(--ink-light); }
+    .phase-label { font-size: 14px; font-weight: 600; fill: var(--ink-light); letter-spacing: 2px; }
+    .node-label { font-size: 15px; font-weight: 600; fill: var(--ink); }
+    .node-caption { font-size: 12px; fill: var(--ink-light); }
+    .cmd { font-size: 14px; font-weight: 700; fill: #c0392b; font-family: 'Consolas','Courier New',monospace; }
+    .edge-label { font-size: 11px; fill: var(--ink-light); }
+    .badge { font-size: 11px; font-weight: 600; }
+
+    /* Animated dashed flow */
+    .flow-primary {
+      stroke: var(--primary); stroke-width: 2.5; fill: none;
+      stroke-dasharray: 8 6; stroke-linecap: round;
+      animation: dash-flow 1.2s linear infinite;
+    }
+    .flow-secondary {
+      stroke: var(--secondary); stroke-width: 1.8; fill: none;
+      stroke-dasharray: 6 5; stroke-linecap: round;
+      animation: dash-flow 2s linear infinite;
+    }
+    .flow-feedback {
+      stroke: var(--feedback); stroke-width: 2; fill: none;
+      stroke-dasharray: 6 4; stroke-linecap: round;
+      animation: dash-flow-reverse 2.5s linear infinite;
+    }
+    @keyframes dash-flow { to { stroke-dashoffset: -28; } }
+    @keyframes dash-flow-reverse { to { stroke-dashoffset: 28; } }
+
+    /* Arrowheads */
+    .arrow-primary { fill: var(--primary); }
+    .arrow-secondary { fill: var(--secondary); }
+    .arrow-feedback { fill: var(--feedback); }
+  </style>
+
+  <defs>
+    <marker id="arr-p" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6 Z" class="arrow-primary"/>
+    </marker>
+    <marker id="arr-s" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6 Z" class="arrow-secondary"/>
+    </marker>
+    <marker id="arr-f" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6 Z" class="arrow-feedback"/>
+    </marker>
+    <filter id="sketch">
+      <feTurbulence type="turbulence" baseFrequency="0.03" numOctaves="2" result="turb"/>
+      <feDisplacementMap in="SourceGraphic" in2="turb" scale="1.2"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="1580" fill="var(--bg)" rx="12"/>
+
+  <!-- Title -->
+  <text x="600" y="44" text-anchor="middle" class="title">kb-wiki 用户使用链路</text>
+  <text x="600" y="68" text-anchor="middle" class="subtitle">从安装到日常使用的完整功能框架</text>
+
+  <!-- ============================================================ -->
+  <!-- PHASE 1: 安装 -->
+  <!-- ============================================================ -->
+  <rect x="40" y="90" width="1120" height="140" rx="16" fill="none" stroke="var(--border)" stroke-width="1.2" stroke-dasharray="6 4" opacity="0.5"/>
+  <text x="60" y="112" class="phase-label">PHASE 1 · 安装</text>
+
+  <!-- Install node -->
+  <rect x="140" y="125" width="200" height="72" rx="14" fill="var(--sand)" stroke="var(--border)" stroke-width="1.8" filter="url(#sketch)"/>
+  <text x="240" y="155" text-anchor="middle" class="cmd">/install</text>
+  <text x="240" y="175" text-anchor="middle" class="node-caption">npx skills add 2811jh/kb-wiki</text>
+
+  <!-- Arrow install -> setup -->
+  <line x1="340" y1="161" x2="460" y2="161" class="flow-primary" marker-end="url(#arr-p)"/>
+
+  <!-- Setup node -->
+  <rect x="460" y="120" width="300" height="82" rx="14" fill="var(--amber)" stroke="var(--border)" stroke-width="1.8" filter="url(#sketch)"/>
+  <text x="610" y="150" text-anchor="middle" class="cmd">/setup</text>
+  <text x="610" y="170" text-anchor="middle" class="node-caption">LLM 自动引导 13 步初始化流程</text>
+  <text x="610" y="186" text-anchor="middle" class="node-caption">环境检测 → 编译 qmd → 创建知识库 → 下载模型</text>
+
+  <!-- Setup sub-items -->
+  <rect x="830" y="108" width="130" height="36" rx="10" fill="var(--mint)" stroke="var(--border)" stroke-width="1.2"/>
+  <text x="895" y="131" text-anchor="middle" class="node-caption">📂 创建目录结构</text>
+
+  <rect x="830" y="150" width="130" height="36" rx="10" fill="var(--mint)" stroke="var(--border)" stroke-width="1.2"/>
+  <text x="895" y="173" text-anchor="middle" class="node-caption">🔧 编译 qmd</text>
+
+  <rect x="975" y="108" width="145" height="36" rx="10" fill="var(--mint)" stroke="var(--border)" stroke-width="1.2"/>
+  <text x="1048" y="131" text-anchor="middle" class="node-caption">📥 下载 AI 模型 🔴</text>
+
+  <rect x="975" y="150" width="145" height="36" rx="10" fill="var(--mint)" stroke="var(--border)" stroke-width="1.2"/>
+  <text x="1048" y="173" text-anchor="middle" class="node-caption">📝 生成 Schema.md</text>
+
+  <line x1="760" y1="145" x2="828" y2="130" class="flow-secondary" marker-end="url(#arr-s)"/>
+  <line x1="760" y1="155" x2="828" y2="168" class="flow-secondary" marker-end="url(#arr-s)"/>
+
+  <!-- ============================================================ -->
+  <!-- PHASE 2: 日常使用 — Ingest -->
+  <!-- ============================================================ -->
+  <rect x="40" y="255" width="545" height="720" rx="16" fill="none" stroke="#e67e22" stroke-width="1.5" stroke-dasharray="6 4" opacity="0.4"/>
+  <text x="60" y="278" class="phase-label">PHASE 2a · 导入资料</text>
+
+  <!-- User action: put files -->
+  <rect x="100" y="295" width="210" height="60" rx="30" fill="var(--sky)" stroke="var(--border)" stroke-width="1.8" filter="url(#sketch)"/>
+  <text x="205" y="320" text-anchor="middle" class="node-label">👤 用户放入资料</text>
+  <text x="205" y="338" text-anchor="middle" class="node-caption">raw/articles/ · raw/papers/</text>
+
+  <!-- Ingest command -->
+  <rect x="100" y="385" width="210" height="56" rx="14" fill="var(--amber)" stroke="var(--border)" stroke-width="1.8" filter="url(#sketch)"/>
+  <text x="205" y="410" text-anchor="middle" class="cmd">/ingest</text>
+  <text x="205" y="428" text-anchor="middle" class="node-caption">支持 md/xlsx/docx/pptx/pdf/图片</text>
+
+  <line x1="205" y1="355" x2="205" y2="383" class="flow-primary" marker-end="url(#arr-p)"/>
+
+  <!-- Step 2.5: Read Schema.md -->
+  <rect x="80" y="468" width="250" height="46" rx="12" fill="var(--coral)" stroke="var(--border)" stroke-width="1.5"/>
+  <text x="205" y="488" text-anchor="middle" class="node-label">📋 读取 Schema.md 命名规范</text>
+  <text x="205" y="503" text-anchor="middle" class="node-caption">强制步骤，确保命名一致性</text>
+
+  <line x1="205" y1="441" x2="205" y2="466" class="flow-primary" marker-end="url(#arr-p)"/>
+
+  <!-- Non-md conversion -->
+  <rect x="365" y="390" width="190" height="56" rx="12" fill="var(--purple)" stroke="var(--border)" stroke-width="1.2"/>
+  <text x="460" y="413" text-anchor="middle" class="node-label">🔄 格式转换</text>
+  <text x="460" y="430" text-anchor="middle" class="node-caption">Python 脚本自动处理</text>
+
+  <line x1="310" y1="413" x2="363" y2="413" class="flow-secondary" marker-end="url(#arr-s)"/>
+  <text x="338" y="406" class="edge-label">非md文件</text>
+
+  <!-- LLM auto-execute block -->
+  <rect x="70" y="540" width="270" height="280" rx="14" fill="white" stroke="var(--primary)" stroke-width="1.5" opacity="0.9"/>
+  <text x="205" y="565" text-anchor="middle" class="node-label">🤖 LLM 自动执行（10 步）</text>
+
+  <rect x="90" y="580" width="230" height="32" rx="8" fill="var(--sand)" stroke="none"/>
+  <text x="205" y="601" text-anchor="middle" class="node-caption">① 创建 sources/ 摘要页（类型前缀命名）</text>
+
+  <rect x="90" y="618" width="230" height="32" rx="8" fill="var(--sand)" stroke="none"/>
+  <text x="205" y="639" text-anchor="middle" class="node-caption">② 更新 entities/ 实体页</text>
+
+  <rect x="90" y="656" width="230" height="32" rx="8" fill="var(--sand)" stroke="none"/>
+  <text x="205" y="677" text-anchor="middle" class="node-caption">③ 更新 concepts/ 概念页</text>
+
+  <rect x="90" y="694" width="230" height="32" rx="8" fill="var(--sand)" stroke="none"/>
+  <text x="205" y="715" text-anchor="middle" class="node-caption">④ 标注矛盾 ⚠️ + 强化交叉引用 🔗</text>
+
+  <rect x="90" y="732" width="230" height="32" rx="8" fill="var(--sand)" stroke="none"/>
+  <text x="205" y="753" text-anchor="middle" class="node-caption">⑤ 修订 synthesis/ 综合结论</text>
+
+  <rect x="90" y="770" width="230" height="32" rx="8" fill="var(--sand)" stroke="none"/>
+  <text x="205" y="791" text-anchor="middle" class="node-caption">⑥ 更新 index.md（纯文本）+ log.md</text>
+
+  <line x1="205" y1="514" x2="205" y2="538" class="flow-primary" marker-end="url(#arr-p)"/>
+
+  <!-- qmd update + embed -->
+  <rect x="100" y="845" width="210" height="52" rx="12" fill="var(--sky)" stroke="var(--border)" stroke-width="1.5"/>
+  <text x="205" y="867" text-anchor="middle" class="node-label">🔍 qmd update + embed</text>
+  <text x="205" y="884" text-anchor="middle" class="node-caption">重建 BM25 + 增量向量嵌入</text>
+
+  <line x1="205" y1="820" x2="205" y2="843" class="flow-primary" marker-end="url(#arr-p)"/>
+
+  <!-- Wiki growing -->
+  <rect x="115" y="920" width="180" height="40" rx="20" fill="var(--mint)" stroke="#27ae60" stroke-width="1.8"/>
+  <text x="205" y="945" text-anchor="middle" class="node-label">📈 wiki/ 知识复利增长</text>
+
+  <line x1="205" y1="897" x2="205" y2="918" class="flow-primary" marker-end="url(#arr-p)"/>
+
+  <!-- ============================================================ -->
+  <!-- PHASE 2b: 日常使用 — Query -->
+  <!-- ============================================================ -->
+  <rect x="615" y="255" width="545" height="720" rx="16" fill="none" stroke="#2980b9" stroke-width="1.5" stroke-dasharray="6 4" opacity="0.4"/>
+  <text x="635" y="278" class="phase-label">PHASE 2b · 查询知识</text>
+
+  <!-- User asks question -->
+  <rect x="710" y="295" width="210" height="60" rx="30" fill="var(--sky)" stroke="var(--border)" stroke-width="1.8" filter="url(#sketch)"/>
+  <text x="815" y="320" text-anchor="middle" class="node-label">👤 用户提问</text>
+  <text x="815" y="338" text-anchor="middle" class="node-caption">自然语言或 /query 命令</text>
+
+  <!-- Query command -->
+  <rect x="710" y="385" width="210" height="50" rx="14" fill="var(--amber)" stroke="var(--border)" stroke-width="1.8" filter="url(#sketch)"/>
+  <text x="815" y="408" text-anchor="middle" class="cmd">/query</text>
+  <text x="815" y="424" text-anchor="middle" class="node-caption">8 步搜索-优先工作流</text>
+
+  <line x1="815" y1="355" x2="815" y2="383" class="flow-primary" marker-end="url(#arr-p)"/>
+
+  <!-- Step 1: qmd status check -->
+  <rect x="700" y="462" width="230" height="50" rx="12" fill="var(--coral)" stroke="var(--border)" stroke-width="1.5"/>
+  <text x="815" y="484" text-anchor="middle" class="node-label">① qmd status 检查</text>
+  <text x="815" y="500" text-anchor="middle" class="node-caption">Vectors=0 → 自动执行 embed 🔴</text>
+
+  <line x1="815" y1="435" x2="815" y2="460" class="flow-primary" marker-end="url(#arr-p)"/>
+
+  <!-- Step 2: qmd query (hybrid search) -->
+  <rect x="670" y="538" width="290" height="72" rx="14" fill="white" stroke="#2980b9" stroke-width="1.5"/>
+  <text x="815" y="563" text-anchor="middle" class="node-label">🔍 qmd query 三阶段混合搜索</text>
+
+  <rect x="688" y="574" width="82" height="26" rx="6" fill="var(--sand)" stroke="none"/>
+  <text x="729" y="592" text-anchor="middle" class="node-caption">BM25</text>
+
+  <rect x="776" y="574" width="82" height="26" rx="6" fill="var(--sky)" stroke="none"/>
+  <text x="817" y="592" text-anchor="middle" class="node-caption">向量语义</text>
+
+  <rect x="864" y="574" width="82" height="26" rx="6" fill="var(--purple)" stroke="none"/>
+  <text x="905" y="592" text-anchor="middle" class="node-caption">LLM 重排</text>
+
+  <line x1="815" y1="512" x2="815" y2="536" class="flow-primary" marker-end="url(#arr-p)"/>
+
+  <!-- Step 3: Read top files -->
+  <rect x="710" y="636" width="210" height="46" rx="12" fill="var(--mint)" stroke="var(--border)" stroke-width="1.2"/>
+  <text x="815" y="656" text-anchor="middle" class="node-label">📖 读取 Top 5-10 页面</text>
+  <text x="815" y="672" text-anchor="middle" class="node-caption">按相关性得分排序</text>
+
+  <line x1="815" y1="610" x2="815" y2="634" class="flow-primary" marker-end="url(#arr-p)"/>
+
+  <!-- Step 4: LLM synthesize -->
+  <rect x="700" y="708" width="230" height="56" rx="14" fill="white" stroke="var(--primary)" stroke-width="1.5"/>
+  <text x="815" y="732" text-anchor="middle" class="node-label">🤖 LLM 综合答案</text>
+  <text x="815" y="750" text-anchor="middle" class="node-caption">带引用 [[sources/...]] + 置信度</text>
+
+  <line x1="815" y1="682" x2="815" y2="706" class="flow-primary" marker-end="url(#arr-p)"/>
+
+  <!-- Output formats -->
+  <rect x="960" y="638" width="170" height="140" rx="12" fill="var(--sand)" stroke="var(--border)" stroke-width="1.2" opacity="0.8"/>
+  <text x="1045" y="658" text-anchor="middle" class="node-label">📋 输出格式</text>
+  <text x="1045" y="680" text-anchor="middle" class="node-caption">A. Markdown 页面</text>
+  <text x="1045" y="697" text-anchor="middle" class="node-caption">B. 对比表格</text>
+  <text x="1045" y="714" text-anchor="middle" class="node-caption">C. Marp 幻灯片</text>
+  <text x="1045" y="731" text-anchor="middle" class="node-caption">D. Matplotlib 图表</text>
+  <text x="1045" y="748" text-anchor="middle" class="node-caption">E. HYDE 高级搜索</text>
+  <text x="1045" y="765" text-anchor="middle" class="node-caption">F. Canvas 画布</text>
+
+  <line x1="930" y1="720" x2="958" y2="720" class="flow-secondary" marker-end="url(#arr-s)"/>
+
+  <!-- Archive decision -->
+  <rect x="720" y="790" width="190" height="68" rx="14" fill="var(--purple)" stroke="var(--border)" stroke-width="1.5"/>
+  <text x="815" y="815" text-anchor="middle" class="node-label">💾 归档决策</text>
+  <text x="815" y="832" text-anchor="middle" class="node-caption">跨 2+ 来源 → 建议归档</text>
+  <text x="815" y="847" text-anchor="middle" class="node-caption">→ synthesis/ 知识复利 📈</text>
+
+  <line x1="815" y1="764" x2="815" y2="788" class="flow-primary" marker-end="url(#arr-p)"/>
+
+  <!-- Compound interest arrow from synthesis back -->
+  <path d="M 720,824 Q 620,824 620,920 L 340,945" class="flow-feedback" marker-end="url(#arr-f)"/>
+  <rect x="470" y="860" width="120" height="22" rx="6" fill="var(--bg)" stroke="var(--feedback)" stroke-width="1" opacity="0.9"/>
+  <text x="530" y="875" text-anchor="middle" class="badge" fill="var(--feedback)">探索即积累 📈</text>
+
+  <!-- ============================================================ -->
+  <!-- PHASE 3: Lint -->
+  <!-- ============================================================ -->
+  <rect x="40" y="990" width="1120" height="260" rx="16" fill="none" stroke="var(--feedback)" stroke-width="1.5" stroke-dasharray="6 4" opacity="0.4"/>
+  <text x="60" y="1013" class="phase-label">PHASE 3 · 维护 / 健康检查</text>
+
+  <!-- Lint trigger -->
+  <rect x="120" y="1035" width="200" height="50" rx="14" fill="var(--coral)" stroke="var(--border)" stroke-width="1.5"/>
+  <text x="220" y="1057" text-anchor="middle" class="node-label">⏰ 每 5 次 ingest</text>
+  <text x="220" y="1074" text-anchor="middle" class="node-caption">自动提醒运行 lint</text>
+
+  <!-- Lint command -->
+  <rect x="385" y="1030" width="180" height="60" rx="14" fill="var(--amber)" stroke="var(--border)" stroke-width="1.8" filter="url(#sketch)"/>
+  <text x="475" y="1057" text-anchor="middle" class="cmd">/lint</text>
+  <text x="475" y="1077" text-anchor="middle" class="node-caption">7 项 + 矛盾解决工作流</text>
+
+  <line x1="320" y1="1060" x2="383" y2="1060" class="flow-primary" marker-end="url(#arr-p)"/>
+
+  <!-- Lint checks -->
+  <rect x="630" y="1025" width="150" height="36" rx="8" fill="var(--sand)" stroke="none"/>
+  <text x="705" y="1048" text-anchor="middle" class="node-caption">① 矛盾论断检测</text>
+
+  <rect x="630" y="1067" width="150" height="36" rx="8" fill="var(--sand)" stroke="none"/>
+  <text x="705" y="1090" text-anchor="middle" class="node-caption">② 孤立页面发现</text>
+
+  <rect x="630" y="1109" width="150" height="36" rx="8" fill="var(--sand)" stroke="none"/>
+  <text x="705" y="1132" text-anchor="middle" class="node-caption">③ 缺失交叉引用</text>
+
+  <rect x="800" y="1025" width="150" height="36" rx="8" fill="var(--sand)" stroke="none"/>
+  <text x="875" y="1048" text-anchor="middle" class="node-caption">④ 过时内容检查</text>
+
+  <rect x="800" y="1067" width="150" height="36" rx="8" fill="var(--sand)" stroke="none"/>
+  <text x="875" y="1090" text-anchor="middle" class="node-caption">⑤ 数据空白分析</text>
+
+  <rect x="800" y="1109" width="150" height="36" rx="8" fill="var(--sand)" stroke="none"/>
+  <text x="875" y="1132" text-anchor="middle" class="node-caption">⑥ 新资料搜索建议</text>
+
+  <line x1="565" y1="1060" x2="628" y2="1048" class="flow-secondary" marker-end="url(#arr-s)"/>
+  <line x1="565" y1="1060" x2="628" y2="1085" class="flow-secondary" marker-end="url(#arr-s)"/>
+  <line x1="565" y1="1060" x2="628" y2="1127" class="flow-secondary" marker-end="url(#arr-s)"/>
+
+  <!-- Health score -->
+  <rect x="970" y="1030" width="160" height="60" rx="14" fill="var(--mint)" stroke="#27ae60" stroke-width="1.5"/>
+  <text x="1050" y="1055" text-anchor="middle" class="node-label">🏥 健康得分</text>
+  <text x="1050" y="1075" text-anchor="middle" class="node-caption">100 分制 → log.md 记录</text>
+
+  <line x1="950" y1="1060" x2="968" y2="1060" class="flow-secondary" marker-end="url(#arr-s)"/>
+
+  <!-- Contradiction resolution -->
+  <rect x="380" y="1120" width="190" height="50" rx="12" fill="var(--coral)" stroke="var(--border)" stroke-width="1.2"/>
+  <text x="475" y="1142" text-anchor="middle" class="node-label">🔴 矛盾解决清单</text>
+  <text x="475" y="1158" text-anchor="middle" class="node-caption">归因 → 验证 → 跟进 query</text>
+
+  <line x1="475" y1="1090" x2="475" y2="1118" class="flow-primary" marker-end="url(#arr-p)"/>
+
+  <!-- New source discovery -->
+  <rect x="380" y="1190" width="190" height="42" rx="12" fill="var(--sky)" stroke="var(--border)" stroke-width="1.2"/>
+  <text x="475" y="1210" text-anchor="middle" class="node-label">📥 补充新资料</text>
+  <text x="475" y="1224" text-anchor="middle" class="node-caption">回到 /ingest 继续积累</text>
+
+  <line x1="475" y1="1170" x2="475" y2="1188" class="flow-primary" marker-end="url(#arr-p)"/>
+
+  <!-- Feedback loop: lint -> ingest -->
+  <path d="M 380,1211 Q 60,1211 60,940 Q 60,400 100,413" class="flow-feedback" marker-end="url(#arr-f)"/>
+  <rect x="36" y="790" width="56" height="22" rx="6" fill="var(--bg)" stroke="var(--feedback)" stroke-width="1" opacity="0.9"/>
+  <text x="64" y="805" text-anchor="middle" class="badge" fill="var(--feedback)">循环 🔄</text>
+
+  <!-- ============================================================ -->
+  <!-- PHASE 4: Schema 演进 -->
+  <!-- ============================================================ -->
+  <rect x="40" y="1270" width="1120" height="140" rx="16" fill="none" stroke="var(--secondary)" stroke-width="1.2" stroke-dasharray="6 4" opacity="0.4"/>
+  <text x="60" y="1293" class="phase-label">PHASE 4 · Schema 演进（持续）</text>
+
+  <rect x="100" y="1310" width="200" height="56" rx="14" fill="var(--sand)" stroke="var(--border)" stroke-width="1.5"/>
+  <text x="200" y="1335" text-anchor="middle" class="node-label">📝 Schema.md</text>
+  <text x="200" y="1353" text-anchor="middle" class="node-caption">规范层，可自定义演进</text>
+
+  <rect x="360" y="1310" width="170" height="56" rx="12" fill="var(--mint)" stroke="var(--border)" stroke-width="1.2"/>
+  <text x="445" y="1333" text-anchor="middle" class="node-caption">新增页面类型</text>
+  <text x="445" y="1350" text-anchor="middle" class="node-caption">如 decisions/</text>
+
+  <rect x="550" y="1310" width="170" height="56" rx="12" fill="var(--mint)" stroke="var(--border)" stroke-width="1.2"/>
+  <text x="635" y="1333" text-anchor="middle" class="node-caption">新增 Frontmatter 字段</text>
+  <text x="635" y="1350" text-anchor="middle" class="node-caption">如 confidence</text>
+
+  <rect x="740" y="1310" width="170" height="56" rx="12" fill="var(--mint)" stroke="var(--border)" stroke-width="1.2"/>
+  <text x="825" y="1333" text-anchor="middle" class="node-caption">领域特定规则</text>
+  <text x="825" y="1350" text-anchor="middle" class="node-caption">如 NPS 分类标准</text>
+
+  <rect x="930" y="1310" width="170" height="56" rx="12" fill="var(--mint)" stroke="var(--border)" stroke-width="1.2"/>
+  <text x="1015" y="1333" text-anchor="middle" class="node-caption">自定义类型前缀</text>
+  <text x="1015" y="1350" text-anchor="middle" class="node-caption">活约定，LLM 自主扩展</text>
+
+  <line x1="300" y1="1338" x2="358" y2="1338" class="flow-secondary" marker-end="url(#arr-s)"/>
+
+  <!-- ============================================================ -->
+  <!-- Bottom: Obsidian integration note -->
+  <!-- ============================================================ -->
+  <rect x="200" y="1440" width="800" height="60" rx="30" fill="var(--sky)" stroke="#2980b9" stroke-width="1.5" opacity="0.7"/>
+  <text x="600" y="1466" text-anchor="middle" class="node-label">👁️ 全程搭配 Obsidian 实时浏览 · 图谱视图 · Dataview 查询 · Web Clipper 剪藏</text>
+  <text x="600" y="1486" text-anchor="middle" class="node-caption">用户浏览 wiki/，LLM 在后台编辑维护 —— Obsidian = IDE，LLM = 程序员，Wiki = 代码库</text>
+
+  <!-- ============================================================ -->
+  <!-- Legend -->
+  <!-- ============================================================ -->
+  <rect x="40" y="1520" width="1120" height="48" rx="10" fill="white" stroke="var(--border)" stroke-width="0.8" opacity="0.7"/>
+  <line x1="70" y1="1544" x2="120" y2="1544" class="flow-primary"/>
+  <text x="128" y="1549" class="edge-label">主流程</text>
+  <line x1="200" y1="1544" x2="250" y2="1544" class="flow-secondary"/>
+  <text x="258" y="1549" class="edge-label">子流程</text>
+  <line x1="330" y1="1544" x2="380" y2="1544" class="flow-feedback"/>
+  <text x="388" y="1549" class="edge-label">反馈循环</text>
+
+  <rect x="470" y="1534" width="50" height="20" rx="5" fill="var(--amber)" stroke="none"/>
+  <text x="530" y="1549" class="edge-label">命令</text>
+  <rect x="570" y="1534" width="50" height="20" rx="5" fill="var(--coral)" stroke="none"/>
+  <text x="630" y="1549" class="edge-label">关键检查</text>
+  <rect x="680" y="1534" width="50" height="20" rx="5" fill="var(--mint)" stroke="none"/>
+  <text x="740" y="1549" class="edge-label">产物/输出</text>
+  <rect x="790" y="1534" width="50" height="20" rx="5" fill="var(--sky)" stroke="none"/>
+  <text x="850" y="1549" class="edge-label">用户动作</text>
+  <rect x="900" y="1534" width="50" height="20" rx="5" fill="var(--purple)" stroke="none"/>
+  <text x="960" y="1549" class="edge-label">AI 处理</text>
+  <text x="1025" y="1549" class="edge-label">🔴 = 强制</text>
+
+</svg>
