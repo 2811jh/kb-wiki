@@ -168,6 +168,18 @@ sources: [raw/articles/user-interview-2024-03.md]
 related: [entities/用户-A, entities/用户-B, concepts/痛点-支付流程, concepts/痛点-加载速度]
 ---
 
+> ⚠️ **YAML Frontmatter 安全规则**（防止 Obsidian 显示红色原始文本）：
+>
+> 含特殊字符（`[ ] : # { } , & * ? | - < > = ! % @`）的值**必须用引号包裹**：
+> ```yaml
+> # ❌ 错误：嵌套方括号导致 YAML 解析失败
+> sources: [raw/articles/[UX][G79]MC玩家竞品游玩情况.pdf]
+>
+> # ✅ 正确：用引号包裹
+> sources: ["raw/articles/[UX][G79]MC玩家竞品游玩情况.pdf"]
+> ```
+> **简化规则**：当文件路径或值中包含 `[`、`]`、`:`、`#` 等字符时，始终用双引号 `"` 包裹整个值。
+
 # 访谈-2024年3月用户访谈
 
 ## 来源信息
