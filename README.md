@@ -33,19 +33,44 @@
 
 ## 快速安装
 
-**方式一**：通过 Skills CLI 安装（推荐）
+### 方式一：通过 Skills CLI 安装（推荐）
 
 ```bash
 npx skills add 2811jh/kb-wiki
 ```
 
-**方式二**：手动安装（如果 Skills CLI 不可用）
+> ⚠️ Skills CLI 内部硬编码 60 秒 clone 超时，**国内网络/未配代理时常常超时失败**。如果出现 `Clone timed out after 60s`，请改用方式二。
 
+### 方式二：手动 git clone（兜底方案，任何环境都可用）
+
+适用于 Skills CLI 失败、内网环境、网络受限、或想精确控制安装位置等所有场景。
+
+**macOS / Linux：**
 ```bash
+mkdir -p ~/.agents/skills
 git clone https://github.com/2811jh/kb-wiki.git ~/.agents/skills/kb-wiki
 ```
 
-安装完成后，在对话中输入以下命令初始化知识库：
+**Windows（PowerShell）：**
+```powershell
+mkdir -Force $HOME\.agents\skills
+git clone https://github.com/2811jh/kb-wiki.git $HOME\.agents\skills\kb-wiki
+```
+
+**国内网络可用的加速镜像（无需梯子）：**
+```bash
+git clone https://ghfast.top/https://github.com/2811jh/kb-wiki.git ~/.agents/skills/kb-wiki
+```
+
+### 验证安装
+
+确认目录已就位：
+
+```bash
+ls ~/.agents/skills/kb-wiki        # 应看到 README.md / SKILL.md / skills/ / scripts/
+```
+
+然后在对话中输入以下命令初始化知识库：
 
 ```
 /setup
